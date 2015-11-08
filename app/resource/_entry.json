@@ -1,0 +1,57 @@
+[{
+  "name": "プリ",
+  "teams": [
+    {
+      "name": "Uチーム",
+      "members": [
+        {
+          "name": "○○",
+          "isAttend": true,
+          "isExcluded": false
+        }
+      ]
+    }
+  ]
+}, {
+  "name": "CM1",
+  "teams": [
+    {
+      "name": "Uチーム",
+      "members": [
+        {
+          "name": "○○",
+          "isAttend": true,
+          "isExcluded": false
+        }
+      ]
+    }
+  ]
+}, {
+  "name": "SG1",
+  "teams": [
+    {
+      "name": "Uチーム",
+      "members": [
+        {
+          "name": "○○",
+          "isAttend": true,
+          "isExcluded": false
+        }
+      ]
+    }
+  ]
+}, {
+  "name": "SG2",
+  "teams": [
+    {
+      "name": "Uチーム",
+      "members": [
+        {
+          "name": "○○",
+          "isAttend": true,
+          "isExcluded": false
+        }
+      ]
+    }
+  ]
+}]

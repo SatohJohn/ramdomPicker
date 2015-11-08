@@ -1,0 +1,21 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>ランダムピック</title>
+		<script src="/js/mithril.min.js"></script>
+		<script src="/js/underscore-min.js"></script>
+		<script src="/js/models.js"></script>
+		<script src="/js/randompicker.js"></script>
+		<script>
+			window.onload = function() {
+				m.route.mode = 'hash';
+				m.route(document.body, 'random', {
+					'random': randomPicker.random
+				});
+			}
+		</script>
+	</head>
+	<body>
+	</body>
+</html>
