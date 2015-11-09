@@ -11,9 +11,9 @@
   "devDependencies": {
     "browser-sync": "^2.9.11",
     "gulp": "^3.9.0",
-    "gulp-connect": "^2.2.0",
     "gulp-convert": "^0.2.0",
-    "gulp-sass": "^2.1.0",
-    "gulp-webserver": "^0.9.1"
+    "gulp-webserver": "^0.9.1",
+    "gulp-convert-encoding": "0.0.3",
+    "gulp-load-plugins": "^1.1.0"
   }
 }

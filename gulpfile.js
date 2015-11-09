@@ -1,7 +1,7 @@
 var gulp = require('gulp');
-var sass = require('gulp-sass');
 var webserver = require('gulp-webserver');
 var convert = require('gulp-convert');
+var encode = require('gulp-convert-encoding');
 
 gulp.task('default', ['convert', 'connect', 'watch']);
 
@@ -14,22 +14,11 @@ gulp.task('js', function () {
 		.pipe(webserver.reload());
 });
 
-gulp.task('sass', function() {
-	gulp.src('./app/sass/**/*.scss')
-		.pipe(sass())
-		.on('error', function(e) {
-			console.log(e.message);
-		})
-		.pipe(gulp.dest('./app/css'));
-});
-
 gulp.task('watch', function () {
 	gulp.watch([
-			'app/**/*.sass',
 			'app/**/*.js',
 			'app/**/*.html'
 		], [
-			'sass',
 			'js',
 			'html'
 		]);
@@ -38,6 +27,10 @@ gulp.task('watch', function () {
 gulp.task('convert', function() {
 	// csvをjsonにコンバートする
 	gulp.src('./app/resource/entry.csv')
+		.pipe(encode({
+			from: 'Shift_JIS',
+			to: 'UTF-8'
+		}))
 		.pipe(convert({
 			from: 'csv',
 			to: 'json'
