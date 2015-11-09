@@ -1,0 +1,12 @@
+$red-color: red;
+$main-color: #100;
+$test: 10px;
+
+body .red {
+	color: $red-color;
+}
+
+.background {
+	color: $main-color;
+	width: $test;
+}
