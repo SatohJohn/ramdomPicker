@@ -1,1 +1,1 @@
-body .red{color:red}.background{color:#100;width:10px}
+#division,#member,#team{font-size:3em}#container{width:100%;display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex}#division,#member,#team{width:33%}.search{width:10px}.search:after{content:"";background-url:url(/icons/search.png)}

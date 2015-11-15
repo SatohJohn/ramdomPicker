@@ -131,40 +131,29 @@ var randomPicker = (function(ns) {
 			}, [
 				m('h2', {
 				}, 'タイトル'),
-				m('table', {
+				m('div', {
+					id: 'container'
 				}, [
-					m('thead', {}, [
-						m('tr', {}, [
-							m('th', {
-							}, '部署名'),
-							m('th', {
-							}, 'チーム名'),
-							m('th', {
-							}, '名前')
-						])
-					]),
-					m('tbody', {
+					m('div', {
+						id: 'division'
 					}, [
-						ctrl.winners().map(function(winner) {
-							return m('tr', {
-							}, [
-								m('td', {
-								}, winner.divisionName),
-								m('td', {
-								}, winner.teamName),
-								m('td', {
-								}, winner.memberName)
-							]);
-						}),
-						m('tr', {
-						}, [
-							m('td', {
-							}, ctrl.getWinner().divisionName),
-							m('td', {
-							}, ctrl.getWinner().teamName),
-							m('td', {
-							}, ctrl.getWinner().memberName)
-						])
+						m('p', {
+						}, '部署名'),
+						ctrl.getWinner().divisionName
+					]),
+					m('div', {
+						id: 'team'
+					}, [
+						m('p', {
+						}, 'チーム名'),
+						ctrl.getWinner().teamName
+					]),
+					m('div', {
+						id: 'member'
+					}, [
+						m('p', {
+						}, '名前'),
+						ctrl.getWinner().memberName
 					])
 				]),
 				m('div', {}, [

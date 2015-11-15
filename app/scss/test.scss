@@ -1,12 +1,35 @@
-$red-color: red;
-$main-color: #100;
-$test: 10px;
+$icon-size: 10px;
+$display-size: 3em;
 
-body .red {
-	color: $red-color;
+%main-font {
+	font-size: $display-size;
 }
 
-.background {
-	color: $main-color;
-	width: $test;
+@define-mixin icon $name {
+	width: $icon-size;
+	&::after {
+		content: "";
+		background-url: url(/icons/$(name).png);
+	}
+}
+
+#container {
+	width: 100%;
+	display: flex;
+}
+#division {
+	@extend %main-font;
+	width: 33%;
+}
+#team {
+	@extend %main-font;
+	width: 33%;
+}
+#member {
+	@extend %main-font;
+	width: 33%;
+}
+
+.search {
+	@mixin icon search;
 }
