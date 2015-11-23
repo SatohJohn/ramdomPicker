@@ -6,13 +6,14 @@ var browser = require("browser-sync");
 var plumber = require("gulp-plumber");
 var rename = require("gulp-rename");
 var postcss = require("gulp-postcss");
+var changed = require("gulp-change");
 
 gulp.task('default', ['convert', 'connect', 'watch']);
 
 gulp.task('js', function () {
 	gulp.src("app/js/**/*.js")
 		.pipe(plumber())
-		.pipe(gulp.dest("app/js"))
+		.pipe(changed("app/js"))
 		.pipe(browser.reload({stream:true}));
 });
 
@@ -31,6 +32,7 @@ gulp.task('css', function () {
 	];
 	gulp.src("app/scss/**/*.scss")
 		.pipe(plumber())
+		.pipe(changed("app/css"))
 		.pipe(postcss(plugins))
 		.pipe(rename({
 			extname: '.css'

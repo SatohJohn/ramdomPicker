@@ -2,49 +2,49 @@
   {
     "division": "プリ",
     "team": "Uチーム",
-    "name": "○○",
+    "name": "A",
     "attend": "○",
     "exclude": "×"
   },
   {
     "division": "プリ",
     "team": "Sチーム",
-    "name": "○○",
+    "name": "B",
     "attend": "○",
     "exclude": "×"
   },
   {
     "division": "プリ",
     "team": "Rチーム",
-    "name": "○○",
+    "name": "C",
     "attend": "○",
     "exclude": "×"
   },
   {
     "division": "CM1",
     "team": "ログチーム",
-    "name": "○○",
+    "name": "D",
     "attend": "○",
     "exclude": "×"
   },
   {
     "division": "SG1",
-    "team": "チーム",
-    "name": "○○",
+    "team": "チーム1",
+    "name": "E",
     "attend": "○",
     "exclude": "×"
   },
   {
     "division": "SG2",
-    "team": "チーム",
-    "name": "○○",
+    "team": "チーム1",
+    "name": "F",
     "attend": "○",
     "exclude": "×"
   },
   {
     "division": "SG2",
-    "team": "チーム",
-    "name": "○○",
+    "team": "チーム2",
+    "name": "G",
     "attend": "○",
     "exclude": "×"
   }
