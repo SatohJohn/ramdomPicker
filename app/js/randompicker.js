@@ -16,9 +16,9 @@ var randomPicker = (function(ns) {
 			}
 			var r = {
 				name: v.division,
-				teams: [{
+				children: [{
 					name: v.team,
-					members: [{
+					children: [{
 						name: v.name,
 						isExcluded: v.exclude
 					}]
@@ -32,19 +32,19 @@ var randomPicker = (function(ns) {
 				return ;
 			}
 
-			var res2 = _.find(res1.teams, function(v) {
-				return v.name == _.first(r.teams).name;
+			var res2 = _.find(res1.children, function(v) {
+				return v.name == _.first(r.children).name;
 			});
 			if (res2 == null) {
-				res1.teams.push(_.first(r.teams));
+				res1.children.push(_.first(r.children));
 				return;
 			}
 
-			var res3 = _.find(res2.members, function(v) {
-				return v.name == _.first(_.first(r.teams).members).name;
+			var res3 = _.find(res2.children, function(v) {
+				return v.name == _.first(_.first(r.children).children).name;
 			});
 			if (res3 == null) {
-				res2.members.push(_.first(_.first(r.teams).members));
+				res2.children.push(_.first(_.first(r.children).children));
 				return;
 			}
 			console.log('同じ事業部に同じチームの同じ名前の人いるで！');
@@ -69,10 +69,16 @@ var randomPicker = (function(ns) {
 					teamName: '',
 					divisionName: ''
 				});
-				ns.random.vm.winners = [];
+				ns.random.vm.preWinner = new ns.model.Winner({
+					memberName: '',
+					teamName: '',
+					divisionName: ''
+				});
+				ns.random.vm.rouletteTime(ns.random.vm.initRouletteTime);
 			},
-			rouletteIds: [null, null, null],
-			rouletteTime: m.prop(100),
+			rouletteTime: m.prop(0),
+			initRouletteTime: 100,
+			roulettePerTime: 300,
 			selected: [{
 				name: '',
 				teams: []
@@ -81,24 +87,38 @@ var randomPicker = (function(ns) {
 				members: []
 			}, {
 				name: ''
-			}]
+			}],
+			tapCount: 0,
+			isDetected: false
 		},
 		controller: function() {
 			ns.random.vm.init();
 			var randomPicker = function(i) {
+				i = i || 3;
 				var selected = ns.random.vm.selected;
 				switch (i) {
-					case 0:
+					case 3:
 						var result = getRandomInt(0, ns.random.vm.divisions.length - 1);
-						selected[i] = ns.random.vm.divisions[Math.min(ns.random.vm.divisions.length - 1, result)];
-						break;
-					case 1:
-						var result = getRandomInt(0, selected[i - 1].teams.length - 1);
-						selected[i] = selected[i - 1].teams[Math.min(selected[i - 1].teams.length - 1, result)];
+						selected[0] = ns.random.vm.divisions[Math.min(ns.random.vm.divisions.length - 1, result)];
+
+						result = getRandomInt(0, selected[0].children.length - 1);
+						selected[1] = selected[0].children[Math.min(selected[0].children.length - 1, result)];
+
+						result = getRandomInt(0, selected[1].children.length - 1);
+						selected[2] = selected[1].children[Math.min(selected[1].children.length - 1, result)];
 						break;
 					case 2:
-						var result = getRandomInt(0, selected[i - 1].members.length - 1);
-						selected[i] = selected[i - 1].members[Math.min(selected[i - 1].members.length - 1, result)];
+						var result = getRandomInt(0, selected[0].children.length - 1);
+						selected[1] = selected[0].children[Math.min(selected[0].children.length - 1, result)];
+
+						result = getRandomInt(0, selected[1].children.length - 1);
+						selected[2] = selected[1].children[Math.min(selected[1].children.length - 1, result)];
+						break;
+					case 1:
+						var result = getRandomInt(0, selected[1].children.length - 1);
+						selected[2] = selected[1].children[Math.min(selected[1].children.length - 1, result)];
+						break;
+					default:
 						break;
 				}
 
@@ -108,35 +128,43 @@ var randomPicker = (function(ns) {
 					divisionName: selected[0].name
 				});
 			};
-			var stop = function(id) {
-				if (id == null) {
-					console.log('ルーレットは止まっている!（はず）');
-					return;
-				}
-				clearInterval(id);
-			};
+
+			var pick = function() {
+				m.startComputation();
+				ns.random.vm.winner = randomPicker(ns.random.vm.tapCount);
+				m.endComputation();
+			}
+
 			return {
 				startRoulette: function() {
-					var l = _.compact(ns.random.vm.rouletteIds);
-					if (l.length != 0) {
-						console.log('ルーレットはまだ動いている!（はず）');
-						return;
-					}
-					ns.random.vm.rouletteIds = _.map(ns.random.vm.rouletteIds, function(v, i) {
-						return setInterval(function() {
-							m.startComputation();
-							ns.random.vm.winner = randomPicker(i);
-							m.endComputation();
-						}, ns.random.vm.rouletteTime());
-					});
+					ns.random.vm.rouletteTime(ns.random.vm.initRouletteTime);
+					ns.random.vm.isDetected = false;
+					ns.random.vm.tapCount = 3;
+					var f = function() {
+						if (ns.random.vm.tapCount != 0) {
+							setTimeout(function() {
+								pick();
+								f();
+							}, ns.random.vm.rouletteTime());
+						}
+					};
+					f();
 				},
 				stopRoulette: function() {
-					var id = _.detect(ns.random.vm.rouletteIds, function(v) {
-						return v != null;
-					});
-					console.log(id);
-					stop(id);
-					ns.random.vm.rouletteIds[_.indexOf(ns.random.vm.rouletteIds, id)] = null;
+					if (ns.random.vm.tapCount != 0) {
+						ns.random.vm.tapCount--;
+						ns.random.vm.rouletteTime(ns.random.vm.roulettePerTime * (4 - ns.random.vm.tapCount));
+						if (ns.random.vm.tapCount == 0) {
+							// アニメーションさせる
+							_.delay(function() {
+								ns.random.vm.isDetected = true;
+							}, 500);
+//							ns.random.vm.randomPicker();
+						}
+					}
+				},
+				isDetected: function() {
+					return ns.random.vm.isDetected;
 				},
 				getWinner: function() {
 					return ns.random.vm.winner;
@@ -189,9 +217,26 @@ var randomPicker = (function(ns) {
 						onchange: m.withAttr('value', ns.random.vm.rouletteTime),
 						onkeyup: m.withAttr('value', ns.random.vm.rouletteTime)
 					})
-				])
+				]),
+				m('div', {
+					className: ctrl.isDetected() == false ? 'detected' : '',
+					config: detect
+				})
 			])
 		}
+	};
+
+	var detect = function(element, isInitialized) {
+		if (isInitialized) {
+			return;
+		}
+		var paper = new Raphael(element);
+		var c = paper.circle(50, 50, 40);
+		c.attr({
+			fill: '#f00',
+			stroke: '#f00',
+			strokeWidth: 0
+		});
 	};
 
 	return ns;

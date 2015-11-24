@@ -3,13 +3,13 @@ var randomPicker = (function(ns) {
 
 	ns.model.Division = function(data) {
 		this.name = data.name;
-		this.teams = data.teams.map(function(val) {
+		this.children = data.children.map(function(val) {
 			return new ns.model.Team(val);
 		});
 	};
 	ns.model.Team = function(data) {
 		this.name = data.name;
-		this.members = data.members.map(function(val) {
+		this.children = data.children.map(function(val) {
 			return new ns.model.Member(val);
 		});
 	};

@@ -33,3 +33,9 @@ $display-size: 3em;
 .search {
 	@mixin icon search;
 }
+
+div.detected {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+}

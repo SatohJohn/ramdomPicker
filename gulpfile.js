@@ -26,13 +26,13 @@ gulp.task('html', function () {
 gulp.task('css', function () {
 	var plugins = [
 		require('postcss-nested'),
+		require('postcss-mq-keyframes'),
 		require('precss')({ /* options */ }),
-		require('autoprefixer'),
-		require('cssnano')
+		require('autoprefixer')
+//		require('cssnano')
 	];
 	gulp.src("app/scss/**/*.scss")
 		.pipe(plumber())
-		.pipe(changed("app/css"))
 		.pipe(postcss(plugins))
 		.pipe(rename({
 			extname: '.css'

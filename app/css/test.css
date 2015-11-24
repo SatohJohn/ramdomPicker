@@ -1,1 +1,35 @@
-#division,#member,#team{font-size:3em}#container{width:100%;display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex}#division,#member,#team{width:33%}.search{width:10px}.search:after{content:"";background-url:url(/icons/search.png)}
+#division, #team, #member {
+	font-size: 3em;
+}
+
+#container {
+	width: 100%;
+	display: -webkit-box;
+	display: -webkit-flex;
+	display: -ms-flexbox;
+	display: flex;
+}
+#division {
+	width: 33%;
+}
+#team {
+	width: 33%;
+}
+#member {
+	width: 33%;
+}
+
+.search {
+	width: 10px;
+}
+
+.search::after {
+	content: "";
+	background-url: url(/icons/search.png);
+}
+
+div.detected {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+}
