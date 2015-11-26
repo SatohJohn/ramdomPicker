@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style media="screen">
+      .wrap {
+        height: 300px;
+        overflow-y: hidden;
+      }
+      .content {
+        height: 100px;
+        font-size: 2em;
+      }
+    </style>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.3/jquery.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/velocity/1.2.3/velocity.min.js"></script>
+    <script>
+      $(function() {
+        var i = false;
+        var isLast = false;
+        // scrollにすると逆方向になるので
+        var scroll = function() {
+          $('.wrap').scrollTop(10000);
+          $('.start').velocity('scroll', {
+            container: $('.wrap'),
+            duration: isLast ? 1500 : 1000,
+            axis: 'y',
+            complete: function(elements) {
+              if (i == false) {
+                scroll();
+              } else if (i == true && isLast == false) {
+                isLast = true;
+                scroll();
+              } else {
+                //うまくずれてくれないので
+                $('.wrap').scrollTop(0);
+              }
+            },
+            delay: 0,
+            easing: isLast ? 'ease-out' : 'linear'
+          });
+        }
+        scroll();
+
+        $('#t').on('click', function() {
+          i = true;
+        });
+      })
+    </script>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="content start">ほげほげ1</div>
+      <div class="content">ほげほげ2</div>
+      <div class="content">ほげほげ3</div>
+      <div class="content">ほげほげ4</div>
+      <div class="content">ほげほげ5</div>
+      <div class="content">ほげほげ6</div>
+      <div class="content">ほげほげ1</div>
+      <div class="content">ほげほげ2</div>
+      <div class="content">ほげほげ3</div>
+      <div class="content">ほげほげ4</div>
+      <div class="content">ほげほげ6</div>
+      <div class="content end">ほげほげ5</div>
+      <div class="content">ほげほげ7</div>
+      <div class="content">ほげほげ8</div>
+    </div>
+    <div>
+      <input id="t" type="button">
+    </div>
+  </body>
+</html>
