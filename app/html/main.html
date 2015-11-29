@@ -7,19 +7,20 @@
 		<script src="/js/underscore-min.js"></script>
 		<script src="/js/models.js"></script>
 		<script src="/js/randompicker.js"></script>
-		<script src="/js/raphael-min.js"></script>
+		<script src="/js/pixi.min.js"></script>
 		<script src="/js/jquery.min.js"></script>
 		<script src="/js/velocity.min.js"></script>
 		<link href="/css/test.css" rel="stylesheet"/>
 		<script>
 			window.onload = function() {
 				m.route.mode = 'hash';
-				m.route(document.body, 'random', {
+				m.route(document.getElementById('component'), 'random', {
 					'random': randomPicker.random
 				});
 			}
 		</script>
 	</head>
 	<body>
+		<div id="component"></div>
 	</body>
 </html>

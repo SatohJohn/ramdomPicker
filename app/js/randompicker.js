@@ -50,7 +50,7 @@ var randomPicker = (function(ns) {
 			console.log('同じ事業部に同じチームの同じ名前の人いるで！');
 		}, result);
 		return result;
-	}
+	};
 
 	ns.random = {
 		vm: {
@@ -60,9 +60,13 @@ var randomPicker = (function(ns) {
 					url: '/resource/entry.json'
 				}).then(function(json) {
 					var result = format(json);
-					ns.random.vm.divisions = result.map(function(val) {
+					ns.random.vm.formattedResult = result.map(function(val) {
 						return new ns.model.Division(val);
 					});
+					console.log(ns.random.vm.formattedResult);
+					ns.random.vm.divisions = ns.random.vm.formattedResult;
+					ns.random.vm.teams = _.flatten(_.pluck(ns.random.vm.divisions, 'children'));
+					ns.random.vm.members = _.flatten(_.pluck(ns.random.vm.teams, 'children'));
 				});
 				ns.random.vm.winner = new ns.model.Winner({
 					memberName: '',
@@ -79,88 +83,46 @@ var randomPicker = (function(ns) {
 			rouletteTime: m.prop(0),
 			initRouletteTime: 100,
 			roulettePerTime: 300,
-			selected: [{
-				name: '',
-				teams: []
-			}, {
-				name: '',
-				members: []
-			}, {
-				name: ''
-			}],
-			tapCount: 0,
-			isDetected: false
+			divisions: [],
+			teams: [],
+			members: [],
+			_divisions: [],
+			_teams: [],
+			_members: [],
+			detectedDivision: {},
+			detectedTeam: {},
+			detectedMember: {},
+			stopAnimation: [false, false, false],
+			tapCount: 3,
+			isDetected: false,
+			scroll: false
 		},
 		controller: function() {
 			ns.random.vm.init();
-			var randomPicker = function(i) {
-				i = i || 3;
-				var selected = ns.random.vm.selected;
-				switch (i) {
-					case 3:
-						var result = getRandomInt(0, ns.random.vm.divisions.length - 1);
-						selected[0] = ns.random.vm.divisions[Math.min(ns.random.vm.divisions.length - 1, result)];
-
-						result = getRandomInt(0, selected[0].children.length - 1);
-						selected[1] = selected[0].children[Math.min(selected[0].children.length - 1, result)];
-
-						result = getRandomInt(0, selected[1].children.length - 1);
-						selected[2] = selected[1].children[Math.min(selected[1].children.length - 1, result)];
-						break;
-					case 2:
-						var result = getRandomInt(0, selected[0].children.length - 1);
-						selected[1] = selected[0].children[Math.min(selected[0].children.length - 1, result)];
-
-						result = getRandomInt(0, selected[1].children.length - 1);
-						selected[2] = selected[1].children[Math.min(selected[1].children.length - 1, result)];
-						break;
-					case 1:
-						var result = getRandomInt(0, selected[1].children.length - 1);
-						selected[2] = selected[1].children[Math.min(selected[1].children.length - 1, result)];
-						break;
-					default:
-						break;
-				}
-
-				return new ns.model.Winner({
-					memberName: selected[2].name,
-					teamName: selected[1].name,
-					divisionName: selected[0].name
-				});
+			var createDisplayedList = function(l) {
+				return _.flatten([l, l, l, l]);
 			};
-
-			var pick = function() {
-				m.startComputation();
-				ns.random.vm.winner = randomPicker(ns.random.vm.tapCount);
-				m.endComputation();
-			}
-
 			return {
 				startRoulette: function() {
-					ns.random.vm.rouletteTime(ns.random.vm.initRouletteTime);
-					ns.random.vm.isDetected = false;
+					ns.random.vm.stopAnimation = [false, false, false];
 					ns.random.vm.tapCount = 3;
-					var f = function() {
-						if (ns.random.vm.tapCount != 0) {
-							setTimeout(function() {
-								pick();
-								f();
-							}, ns.random.vm.rouletteTime());
-						}
-					};
-					f();
+
+					ns.random.vm.scroll = false;
+					ns.random.vm.detectedDivision = {};
+					ns.random.vm.detectedTeam = {};
+					ns.random.vm.detectedMember = {};
+					ns.random.vm.divisions = _.shuffle(ns.random.vm.divisions);
+					ns.random.vm.teams = _.shuffle(ns.random.vm.teams);
+					ns.random.vm.members = _.shuffle(ns.random.vm.members);
+					ns.random.vm._divisions = createDisplayedList(ns.random.vm.divisions);
+					ns.random.vm._teams = createDisplayedList(ns.random.vm.teams);
+					ns.random.vm._members = createDisplayedList(ns.random.vm.members);
 				},
 				stopRoulette: function() {
-					if (ns.random.vm.tapCount != 0) {
+					if (ns.random.vm.scroll == false && ns.random.vm.tapCount != 0) {
+						ns.random.vm.stopAnimation[3 - ns.random.vm.tapCount] = true;
 						ns.random.vm.tapCount--;
-						ns.random.vm.rouletteTime(ns.random.vm.roulettePerTime * (4 - ns.random.vm.tapCount));
-						if (ns.random.vm.tapCount == 0) {
-							// アニメーションさせる
-							_.delay(function() {
-								ns.random.vm.isDetected = true;
-							}, 500);
-//							ns.random.vm.randomPicker();
-						}
+						ns.random.vm.scroll = true;
 					}
 				},
 				isDetected: function() {
@@ -171,38 +133,86 @@ var randomPicker = (function(ns) {
 				},
 				winners: function() {
 					return ns.random.vm.winners;
+				},
+				getDivisions: function() {
+					return ns.random.vm._divisions;
+				},
+				getTeams: function() {
+					return _.filter(ns.random.vm._teams, function(v) {
+						if (ns.random.vm.detectedDivision.name == null) {
+							return true;
+						}
+						return _.isEqual(v.parent.name, ns.random.vm.detectedDivision.name);
+					});
+				},
+				getMembers: function() {
+					return _.filter(ns.random.vm._members, function(v) {
+						if (ns.random.vm.detectedTeam.name == null) {
+							return true;
+						}
+						return _.isEqual(v.parent.parent.name, ns.random.vm.detectedDivision.name) && _.isEqual(v.parent.name, ns.random.vm.detectedTeam.name);
+					});
+				},
+				shiftStopMotionForDivision: function() {
+					return ns.random.vm.stopAnimation[0];
+				},
+				shiftStopMotionForTeam: function() {
+					return ns.random.vm.stopAnimation[1];
+				},
+				shiftStopMotionForMember: function() {
+					return ns.random.vm.stopAnimation[2];
+				},
+				isFinished: function() {
+					return ns.random.vm.detectedDivision.name != null && ns.random.vm.detectedTeam.name != null && ns.random.vm.detectedMember.name != null && ns.random.vm.scroll == false;
 				}
 			};
 		},
 		view: function(ctrl) {
 			return m('div', {
 			}, [
-				m('h2', {
-				}, 'タイトル'),
 				m('div', {
 					id: 'container'
 				}, [
 					m('div', {
+						className: 'detect-line',
+						config: detectLine
+					}),
+					m('div', {
 						id: 'division'
 					}, [
-						m('p', {
-						}, '部署名'),
-						ctrl.getWinner().divisionName
+						m('div', {
+							className: 'wrap' + (ctrl.shiftStopMotionForDivision() ? '' : ' loop'),
+							config: animateScroll
+						}, ctrl.getDivisions().map(function(v, i) {
+								return m('div', {
+									className: 'content' + (i == 0 ? ' start' : '')
+								}, m('span', v.name));
+							})),
 					]),
 					m('div', {
 						id: 'team'
 					}, [
-						m('p', {
-						}, 'チーム名'),
-						ctrl.getWinner().teamName
+						m('div', {
+							className: 'wrap' + (ctrl.shiftStopMotionForTeam() ? '' : ' loop'),
+							config: animateScroll
+						}, ctrl.getTeams().map(function(v, i) {
+								return m('div', {
+									className: 'content' + (i == 0 ? ' start' : '')
+								}, m('span', v.name));
+							})),
 					]),
 					m('div', {
 						id: 'member'
 					}, [
-						m('p', {
-						}, '名前'),
-						ctrl.getWinner().memberName
-					])
+						m('div', {
+							className: 'wrap' + (ctrl.shiftStopMotionForMember() ? '' : ' loop'),
+							config: animateScroll
+						}, ctrl.getMembers().map(function(v, i) {
+								return m('div', {
+									className: 'content' + (i == 0 ? ' start' : '')
+								}, m('span', v.name));
+							})),
+					]),
 				]),
 				m('div', {}, [
 					m('button', {
@@ -210,16 +220,11 @@ var randomPicker = (function(ns) {
 					}, 'ルーレットスタート'),
 					m('button', {
 						onclick: ctrl.stopRoulette
-					}, '止める'),
-					m('input', {
-						type: 'number',
-						value: ns.random.vm.rouletteTime(),
-						onchange: m.withAttr('value', ns.random.vm.rouletteTime),
-						onkeyup: m.withAttr('value', ns.random.vm.rouletteTime)
-					})
+					}, '止める')
 				]),
 				m('div', {
-					className: ctrl.isDetected() == false ? 'detected' : '',
+					style: ctrl.isFinished() ? '' : 'display: none;',
+					className: 'detected',
 					config: detect
 				})
 			])
@@ -230,13 +235,110 @@ var randomPicker = (function(ns) {
 		if (isInitialized) {
 			return;
 		}
-		var paper = new Raphael(element);
-		var c = paper.circle(50, 50, 40);
-		c.attr({
-			fill: '#f00',
-			stroke: '#f00',
-			strokeWidth: 0
+		var renderer = new PIXI.WebGLRenderer($(element).width(), $(element).height(), {
+			backgroundColor: 0xFFFFFF
 		});
+		$(element).append(renderer.view);
+		var stage = new PIXI.Container();
+		PIXI.loader.add('a', '/img/a1.gif').add('b', '/img/b1.gif').add('c', '/img/c1.gif').load(function (loader, resources) {
+			var list = [
+				new PIXI.Sprite(resources.a.texture),
+				new PIXI.Sprite(resources.b.texture),
+				new PIXI.Sprite(resources.c.texture)
+			];
+			list[0].position.x = 800;
+			list[0].position.y = 50;
+			list[1].position.x = 100;
+			list[1].position.y = 400;
+			list[2].position.x = 1000;
+			list[2].position.y = 600;
+			stage.addChild(list[0]);
+			stage.addChild(list[1]);
+			stage.addChild(list[2]);
+			function animate() {
+				requestAnimationFrame(animate);
+				var time = new Date().getTime();
+				list[0].position.x += Math.sin(time / 13 * (Math.PI / 180)) * 2;
+				list[0].position.y += Math.sin(time / 5 * (Math.PI / 180)) * 2;
+
+				list[1].position.x += Math.cos(time / 13 * (Math.PI / 180)) * 2;
+				list[1].position.y += Math.cos(time / 5 * (Math.PI / 180)) * 2;
+
+				list[2].position.x += Math.sin(time / 18 * (Math.PI / 180)) * 3;
+				list[2].position.y += Math.sin(time / 5 * (Math.PI / 180)) * 2;
+				renderer.render(stage);
+			}
+			animate();
+		});
+	};
+
+	var detectLine = function(element, isInitialized) {
+		if (isInitialized) {
+			return;
+		}
+		var $e = $(element);
+		$e.velocity({opacity: 0}, {
+			duration: 700,
+			loop: true
+		})
+	};
+
+	var animateScroll = function(element, isInitialized) {
+		var $e = $(element);
+		if ($e.data('last') == true) {
+			return ;
+		}
+		$e.data({
+			'last': false
+		});
+		var scroll = function() {
+			$e.scrollTop($e.children().length * 100);
+			$e.find('.start').velocity('scroll', {
+				container: $e,
+				duration: 600,
+				axis: 'y',
+				complete: function(elements) {
+					if ($e.hasClass('loop') == true) {
+						scroll();
+					} else if ($e.hasClass('loop') == false) {
+						$e.data('last', true);
+						last();
+					}
+				},
+				easing: 'linear'
+			});
+		};
+		var last = function() {
+			$e.scrollTop($e.children().length * 100);
+			$e.find('.start').velocity('scroll', {
+				container: $e,
+				duration: 1000,
+				axis: 'y',
+				complete: function(elements) {
+					m.startComputation();
+					switch(ns.random.vm.tapCount) {
+						case 2:
+							ns.random.vm.detectedDivision = ns.random.vm.divisions[1];
+							break;
+						case 1:
+							ns.random.vm.detectedTeam = _.filter(ns.random.vm.teams, function(v) {
+								return _.isEqual(v.parent.name, ns.random.vm.detectedDivision.name);
+							})[1];
+							break;
+						case 0:
+							ns.random.vm.detectedMember = _.filter(ns.random.vm.members, function(v) {
+								return _.isEqual(v.parent.parent.name, ns.random.vm.detectedDivision.name) && _.isEqual(v.parent.name, ns.random.vm.detectedTeam.name);
+							})[1];
+							break;
+					}
+					ns.random.vm.scroll = false;
+					m.endComputation();
+				},
+				loop: false,
+				easing: 'ease-out'
+			});
+		}
+		scroll();
 	};
 
 	return ns;
