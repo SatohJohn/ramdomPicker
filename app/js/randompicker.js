@@ -160,7 +160,7 @@ var randomPicker = (function(ns) {
 						if (ns.random.vm.detectedDivision.name == null) {
 							return true;
 						}
-						return _.isEqual(v.parent.name, ns.random.vm.detectedDivision.name);
+						return v.canRemain();
 					});
 				},
 				getMembers: function() {
@@ -168,7 +168,7 @@ var randomPicker = (function(ns) {
 						if (ns.random.vm.detectedTeam.name == null) {
 							return true;
 						}
-						return _.isEqual(v.parent.parent.name, ns.random.vm.detectedDivision.name) && _.isEqual(v.parent.name, ns.random.vm.detectedTeam.name);
+						return v.canRemain();
 					});
 				},
 				shiftStopMotionForDivision: function() {
@@ -202,7 +202,7 @@ var randomPicker = (function(ns) {
 							className: 'wrap' + (ctrl.shiftStopMotionForDivision() ? '' : ' loop')
 						}, ctrl.getDivisions().map(function(v, i) {
 								return m('div', {
-									className: 'content' + (i == 0 ? ' scroll-end' : '')
+									className: 'content' + (i == 0 ? ' scroll-end' : '') + (' division_' + i)
 								}, m('span', v.name));
 							})),
 					]),
@@ -213,7 +213,7 @@ var randomPicker = (function(ns) {
 							className: 'wrap' + (ctrl.shiftStopMotionForTeam() ? '' : ' loop')
 						}, ctrl.getTeams().map(function(v, i) {
 								return m('div', {
-									className: 'content' + (i == 0 ? ' scroll-end' : '')
+									className: 'content' + (i == 0 ? ' scroll-end' : '') + (' team_' + i)
 								}, m('span', v.name));
 							})),
 					]),
@@ -224,7 +224,7 @@ var randomPicker = (function(ns) {
 							className: 'wrap' + (ctrl.shiftStopMotionForMember() ? '' : ' loop')
 						}, ctrl.getMembers().map(function(v, i) {
 								return m('div', {
-									className: 'content' + (i == 0 ? ' scroll-end' : '')
+									className: 'content' + (i == 0 ? ' scroll-end' : '') + (' member_' + i)
 								}, m('span', v.name));
 							})),
 					]),
@@ -247,29 +247,30 @@ var randomPicker = (function(ns) {
 	};
 
 	// スクロール完了時に呼ばれる
-	ns.random.effect.scrollComplete = function($e) {
+	ns.random.effect.scrollComplete = function($selected) {
 		m.startComputation();
-		var fetch = function(list) {
-			var filtered = _.filter(list, function(v) {
-				return v.canRemain();
-			});
-			if (filtered.length > 2) {
-				return filtered[1];
-			}
-			return filtered[0];
+		var className = $selected.attr('class');
+		var extractSelectedNumber = function(str) {
+			var r = new RegExp(str + '_[0-9]+');
+			return parseInt(_.first(r.exec(className)).substr((str + '_').length));
 		};
 		var vm = ns.random.vm;
 		switch(vm.tapCount) {
 			case 2:
-				vm.detectedDivision = vm.divisions[1];
+				console.log(extractSelectedNumber('division'));
+				vm.detectedDivision = vm._divisions[extractSelectedNumber('division')];
 				vm.detectedDivision.toDetermination();
 				break;
 			case 1:
-				vm.detectedTeam = fetch(vm.teams);
+				vm.detectedTeam = _.filter(vm._teams, function(v) {
+					return v.canRemain();
+				})[extractSelectedNumber('team')];
 				vm.detectedTeam.toDetermination();
 				break;
 			case 0:
-				vm.detectedMember = fetch(vm.members);
+				vm.detectedMember = _.filter(vm._members, function(v) {
+					return v.canRemain();
+				})[extractSelectedNumber('member')];
 				// 再度当選させないため、この人に印をつける
 				vm.detectedMember.isExcluded = true;
 				vm.detectedMember.toDetermination();

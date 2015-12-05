@@ -63,7 +63,7 @@ var randomPicker = (function(ns) {
 					axis: 'y',
 					complete: function(elements) {
 						if (isLast) {
-							ns.random.effect.scrollComplete($e);
+							ns.random.effect.scrollComplete($e.find('.scroll-end + div'));
 							return ;
 						}
 						if ($e.hasClass('loop') == true) {

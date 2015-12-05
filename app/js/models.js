@@ -6,6 +6,7 @@ var randomPicker = (function(ns) {
 		this.name = data.name;
 		this.primary = data.primary;
 		this.determination = false;
+		this.displayed = true;
 		this.children = data.children.map(function(val) {
 			val.parent = self;
 			return new ns.model.Team(val);
