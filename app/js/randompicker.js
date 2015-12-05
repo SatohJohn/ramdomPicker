@@ -11,9 +11,6 @@ var randomPicker = (function(ns) {
 	var format = function(json) {
 		var result = [];
 		_.map(json, function(v) {
-			if (v.attend == '×') {
-				return ;
-			}
 			var r = {
 				name: v.division,
 				children: [{
@@ -53,6 +50,7 @@ var randomPicker = (function(ns) {
 	};
 
 	ns.random = {
+		effect: ns.random.effect,
 		vm: {
 			init: function() {
 				m.request({
@@ -108,15 +106,35 @@ var randomPicker = (function(ns) {
 					ns.random.vm.tapCount = 3;
 
 					ns.random.vm.scroll = false;
+					ns.random.vm.isDetected = false;
+
 					ns.random.vm.detectedDivision = {};
 					ns.random.vm.detectedTeam = {};
 					ns.random.vm.detectedMember = {};
-					ns.random.vm.divisions = _.shuffle(ns.random.vm.divisions);
-					ns.random.vm.teams = _.shuffle(ns.random.vm.teams);
-					ns.random.vm.members = _.shuffle(ns.random.vm.members);
+
+					ns.random.vm.members = _.shuffle(ns.random.vm.members).filter(function(v) {
+						v.unsetDetermination();
+						return v.isCandidate();
+					});
+					ns.random.vm.teams = _.shuffle(ns.random.vm.teams).filter(function(v) {
+						v.unsetDetermination();
+						return v.isCandidate();
+					});
+					ns.random.vm.divisions = _.shuffle(ns.random.vm.divisions).filter(function(v) {
+						v.unsetDetermination();
+						return v.isCandidate();
+					});
+
 					ns.random.vm._divisions = createDisplayedList(ns.random.vm.divisions);
 					ns.random.vm._teams = createDisplayedList(ns.random.vm.teams);
 					ns.random.vm._members = createDisplayedList(ns.random.vm.members);
+
+					// スロットの要素を一度作成しなければいけないので、一瞬待つ
+					setTimeout(function() {
+						ns.random.effect.animateScroll($('#division > div.loop'));
+						ns.random.effect.animateScroll($('#team > div.loop'));
+						ns.random.effect.animateScroll($('#member > div.loop'));
+					}, 10);
 				},
 				stopRoulette: function() {
 					if (ns.random.vm.scroll == false && ns.random.vm.tapCount != 0) {
@@ -163,7 +181,7 @@ var randomPicker = (function(ns) {
 					return ns.random.vm.stopAnimation[2];
 				},
 				isFinished: function() {
-					return ns.random.vm.detectedDivision.name != null && ns.random.vm.detectedTeam.name != null && ns.random.vm.detectedMember.name != null && ns.random.vm.scroll == false;
+					return ns.random.vm.isDetected;
 				}
 			};
 		},
@@ -175,17 +193,16 @@ var randomPicker = (function(ns) {
 				}, [
 					m('div', {
 						className: 'detect-line',
-						config: detectLine
+						config: ns.random.effect.detectLine
 					}),
 					m('div', {
 						id: 'division'
 					}, [
 						m('div', {
-							className: 'wrap' + (ctrl.shiftStopMotionForDivision() ? '' : ' loop'),
-							config: animateScroll
+							className: 'wrap' + (ctrl.shiftStopMotionForDivision() ? '' : ' loop')
 						}, ctrl.getDivisions().map(function(v, i) {
 								return m('div', {
-									className: 'content' + (i == 0 ? ' start' : '')
+									className: 'content' + (i == 0 ? ' scroll-end' : '')
 								}, m('span', v.name));
 							})),
 					]),
@@ -193,11 +210,10 @@ var randomPicker = (function(ns) {
 						id: 'team'
 					}, [
 						m('div', {
-							className: 'wrap' + (ctrl.shiftStopMotionForTeam() ? '' : ' loop'),
-							config: animateScroll
+							className: 'wrap' + (ctrl.shiftStopMotionForTeam() ? '' : ' loop')
 						}, ctrl.getTeams().map(function(v, i) {
 								return m('div', {
-									className: 'content' + (i == 0 ? ' start' : '')
+									className: 'content' + (i == 0 ? ' scroll-end' : '')
 								}, m('span', v.name));
 							})),
 					]),
@@ -205,11 +221,10 @@ var randomPicker = (function(ns) {
 						id: 'member'
 					}, [
 						m('div', {
-							className: 'wrap' + (ctrl.shiftStopMotionForMember() ? '' : ' loop'),
-							config: animateScroll
+							className: 'wrap' + (ctrl.shiftStopMotionForMember() ? '' : ' loop')
 						}, ctrl.getMembers().map(function(v, i) {
 								return m('div', {
-									className: 'content' + (i == 0 ? ' start' : '')
+									className: 'content' + (i == 0 ? ' scroll-end' : '')
 								}, m('span', v.name));
 							})),
 					]),
@@ -225,121 +240,46 @@ var randomPicker = (function(ns) {
 				m('div', {
 					style: ctrl.isFinished() ? '' : 'display: none;',
 					className: 'detected',
-					config: detect
+					config: ns.random.effect.detect
 				})
 			])
 		}
 	};
 
-	var detect = function(element, isInitialized) {
-		if (isInitialized) {
-			return;
-		}
-		var renderer = new PIXI.WebGLRenderer($(element).width(), $(element).height(), {
-			backgroundColor: 0xFFFFFF
-		});
-		$(element).append(renderer.view);
-		var stage = new PIXI.Container();
-		PIXI.loader.add('a', '/img/a1.gif').add('b', '/img/b1.gif').add('c', '/img/c1.gif').load(function (loader, resources) {
-			var list = [
-				new PIXI.Sprite(resources.a.texture),
-				new PIXI.Sprite(resources.b.texture),
-				new PIXI.Sprite(resources.c.texture)
-			];
-			list[0].position.x = 800;
-			list[0].position.y = 50;
-			list[1].position.x = 100;
-			list[1].position.y = 400;
-			list[2].position.x = 1000;
-			list[2].position.y = 600;
-			stage.addChild(list[0]);
-			stage.addChild(list[1]);
-			stage.addChild(list[2]);
-			function animate() {
-				requestAnimationFrame(animate);
-				var time = new Date().getTime();
-				list[0].position.x += Math.sin(time / 13 * (Math.PI / 180)) * 2;
-				list[0].position.y += Math.sin(time / 5 * (Math.PI / 180)) * 2;
-
-				list[1].position.x += Math.cos(time / 13 * (Math.PI / 180)) * 2;
-				list[1].position.y += Math.cos(time / 5 * (Math.PI / 180)) * 2;
-
-				list[2].position.x += Math.sin(time / 18 * (Math.PI / 180)) * 3;
-				list[2].position.y += Math.sin(time / 5 * (Math.PI / 180)) * 2;
-				renderer.render(stage);
+	// スクロール完了時に呼ばれる
+	ns.random.effect.scrollComplete = function($e) {
+		m.startComputation();
+		var fetch = function(list) {
+			var filtered = _.filter(list, function(v) {
+				return v.canRemain();
+			});
+			if (filtered.length > 2) {
+				return filtered[1];
 			}
-			animate();
-		});
-	};
-
-	var detectLine = function(element, isInitialized) {
-		if (isInitialized) {
-			return;
-		}
-		var $e = $(element);
-		$e.velocity({opacity: 0}, {
-			duration: 700,
-			loop: true
-		})
-	};
-
-	var animateScroll = function(element, isInitialized) {
-		var $e = $(element);
-		if ($e.data('last') == true) {
-			return ;
-		}
-		$e.data({
-			'last': false
-		});
-		var scroll = function() {
-			$e.scrollTop($e.children().length * 100);
-			$e.find('.start').velocity('scroll', {
-				container: $e,
-				duration: 600,
-				axis: 'y',
-				complete: function(elements) {
-					if ($e.hasClass('loop') == true) {
-						scroll();
-					} else if ($e.hasClass('loop') == false) {
-						$e.data('last', true);
-						last();
-					}
-				},
-				easing: 'linear'
-			});
+			return filtered[0];
 		};
-		var last = function() {
-			$e.scrollTop($e.children().length * 100);
-			$e.find('.start').velocity('scroll', {
-				container: $e,
-				duration: 1000,
-				axis: 'y',
-				complete: function(elements) {
-					m.startComputation();
-					switch(ns.random.vm.tapCount) {
-						case 2:
-							ns.random.vm.detectedDivision = ns.random.vm.divisions[1];
-							break;
-						case 1:
-							ns.random.vm.detectedTeam = _.filter(ns.random.vm.teams, function(v) {
-								return _.isEqual(v.parent.name, ns.random.vm.detectedDivision.name);
-							})[1];
-							break;
-						case 0:
-							ns.random.vm.detectedMember = _.filter(ns.random.vm.members, function(v) {
-								return _.isEqual(v.parent.parent.name, ns.random.vm.detectedDivision.name) && _.isEqual(v.parent.name, ns.random.vm.detectedTeam.name);
-							})[1];
-							break;
-					}
-					ns.random.vm.scroll = false;
-					m.endComputation();
-				},
-				loop: false,
-				easing: 'ease-out'
-			});
+		var vm = ns.random.vm;
+		switch(vm.tapCount) {
+			case 2:
+				vm.detectedDivision = vm.divisions[1];
+				vm.detectedDivision.toDetermination();
+				break;
+			case 1:
+				vm.detectedTeam = fetch(vm.teams);
+				vm.detectedTeam.toDetermination();
+				break;
+			case 0:
+				vm.detectedMember = fetch(vm.members);
+				// 再度当選させないため、この人に印をつける
+				vm.detectedMember.isExcluded = true;
+				vm.detectedMember.toDetermination();
+				vm.isDetected = true;
+				break;
 		}
-		scroll();
-	};
+		vm.scroll = false;
+		m.endComputation();
+	}
+
 
 	return ns;
 
