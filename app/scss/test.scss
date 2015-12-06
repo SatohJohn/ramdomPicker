@@ -1,6 +1,6 @@
 $icon-size: 10px;
 $slot-width-size: 99%;
-$slot-height-size: 300px;
+$slot-height-size: 330px;
 
 %slot-rale {
 	height: $slot-height-size;
@@ -10,8 +10,9 @@ $slot-height-size: 300px;
 #container {
 	width: $slot-width-size;
 	display: flex;
+	justify-content: center;
 	position: relative;
-	margin-top: 20%;
+	border: solid 4px #dddddd;
 }
 #division {
 	width: calc($slot-width-size / 3);
@@ -24,22 +25,18 @@ $slot-height-size: 300px;
 }
 div.wrap {
 	@extend %slot-rale;
+	border: solid 1px #eeeeee;
+	box-shadow: inset 0px 4px 6px #999, inset 0px -4px 6px #999;
 }
 div.content {
 	height: calc($slot-height-size / 3);
+	height: 100px;
 	font-size: 2em;
 	text-align: center;
 	vertical-align: middle;
+	border: solid 1px #eeeeee;
 	padding-top: 15px;
 }
-div.detect-line {
-	position: absolute;
-	border: dashed 2px #0000ff;
-	width: $slot-width-size;
-	top: calc($slot-height-size / 3);
-	height: calc($slot-height-size / 3);
-}
-
 
 @keyframes fly {
 	0% {
@@ -60,6 +57,10 @@ div.detect-line {
 }
 
 div.detected {
+	background-color: red;
+}
+
+div.detectedArea {
 	position: absolute;
 	z-index: -10;
 	top: 0px;

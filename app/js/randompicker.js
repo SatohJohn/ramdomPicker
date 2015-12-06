@@ -1,13 +1,5 @@
 var randomPicker = (function(ns) {
 
-	/**
-	 * Returns a random integer between min (inclusive) and max (inclusive)
-	 * Using Math.round() will give you a non-uniform distribution!
-	 */
-	function getRandomInt(min, max) {
-		return Math.floor(Math.random() * (max - min + 1)) + min;
-	}
-
 	var format = function(json) {
 		var result = [];
 		_.map(json, function(v) {
@@ -50,7 +42,7 @@ var randomPicker = (function(ns) {
 	};
 
 	ns.random = {
-		effect: ns.random.effect,
+		effect: ns.effect,
 		vm: {
 			init: function() {
 				m.request({
@@ -93,24 +85,25 @@ var randomPicker = (function(ns) {
 			stopAnimation: [false, false, false],
 			tapCount: 3,
 			isDetected: false,
-			scroll: false
+			scrolling: false,
+			cannotPushButton: false
 		},
 		controller: function() {
 			ns.random.vm.init();
 			var createDisplayedList = function(l) {
-				return _.flatten([l, l, l, l]);
+				return _.flatten([l, l, l, l, l, l]);
 			};
 			return {
 				startRoulette: function() {
 					ns.random.vm.stopAnimation = [false, false, false];
 					ns.random.vm.tapCount = 3;
 
-					ns.random.vm.scroll = false;
 					ns.random.vm.isDetected = false;
 
 					ns.random.vm.detectedDivision = {};
 					ns.random.vm.detectedTeam = {};
 					ns.random.vm.detectedMember = {};
+					ns.random.vm.cannotPushButton = false;
 
 					ns.random.vm.members = _.shuffle(ns.random.vm.members).filter(function(v) {
 						v.unsetDetermination();
@@ -131,17 +124,17 @@ var randomPicker = (function(ns) {
 
 					// スロットの要素を一度作成しなければいけないので、一瞬待つ
 					setTimeout(function() {
-						ns.random.effect.animateScroll($('#division > div.loop'));
-						ns.random.effect.animateScroll($('#team > div.loop'));
-						ns.random.effect.animateScroll($('#member > div.loop'));
+						$('div.content').toggleClass('detected', false);
+						ns.effect.animateScroll($('#division > div.loop'));
+						ns.effect.animateScroll($('#team > div.loop'));
+						ns.effect.animateScroll($('#member > div.loop'));
 					}, 10);
+					ns.random.vm.scrolling = true;
 				},
 				stopRoulette: function() {
-					if (ns.random.vm.scroll == false && ns.random.vm.tapCount != 0) {
-						ns.random.vm.stopAnimation[3 - ns.random.vm.tapCount] = true;
-						ns.random.vm.tapCount--;
-						ns.random.vm.scroll = true;
-					}
+					ns.random.vm.cannotPushButton = true;
+					ns.random.vm.stopAnimation[0] = true;
+					ns.random.vm.tapCount = 2;
 				},
 				isDetected: function() {
 					return ns.random.vm.isDetected;
@@ -182,72 +175,98 @@ var randomPicker = (function(ns) {
 				},
 				isFinished: function() {
 					return ns.random.vm.isDetected;
+				},
+				isDetectedNumber: function(i) {
+					return i == 2;
+				},
+				isPreDetectedNumber: function(i) {
+					return i == 3;
+				},
+				isScrolling: function() {
+					return ns.random.vm.scrolling;
+				},
+				cannotPushButton: function() {
+					return ns.random.vm.cannotPushButton;
 				}
 			};
 		},
 		view: function(ctrl) {
-			return m('div', {
-			}, [
-				m('div', {
-					id: 'container'
+			var constructDetectClass = function(i) {
+				return (ctrl.isDetectedNumber(i) ? ' scroll-end' : '') + (ctrl.isPreDetectedNumber(i) ? ' pre-scroll-end' : '');
+			};
+			return [m('div', {
+					style: ctrl.isFinished() ? 'display: none;' : '',
 				}, [
 					m('div', {
-						className: 'detect-line',
-						config: ns.random.effect.detectLine
-					}),
-					m('div', {
-						id: 'division'
+						id: 'container'
 					}, [
 						m('div', {
-							className: 'wrap' + (ctrl.shiftStopMotionForDivision() ? '' : ' loop')
-						}, ctrl.getDivisions().map(function(v, i) {
-								return m('div', {
-									className: 'content' + (i == 0 ? ' scroll-end' : '') + (' division_' + i)
-								}, m('span', v.name));
-							})),
+							id: 'division'
+						}, [
+							m('div', {
+								className: 'wrap' + (ctrl.shiftStopMotionForDivision() ? '' : ' loop')
+							}, ctrl.getDivisions().map(function(v, i) {
+									return m('div', {
+										className: 'content' + (' division_' + i) + constructDetectClass(i),
+										key: i
+									}, m('span', v.name));
+								})),
+						]),
+						m('div', {
+							id: 'team'
+						}, [
+							m('div', {
+								className: 'wrap' + (ctrl.shiftStopMotionForTeam() ? '' : ' loop')
+							}, ctrl.getTeams().map(function(v, i) {
+									return m('div', {
+										className: 'content' + constructDetectClass(i) + (' team_' + i),
+										key: i
+									}, m('span', v.name));
+								})),
+						]),
+						m('div', {
+							id: 'member'
+						}, [
+							m('div', {
+								className: 'wrap' + (ctrl.shiftStopMotionForMember() ? '' : ' loop')
+							}, ctrl.getMembers().map(function(v, i) {
+									return m('div', {
+										className: 'content' + constructDetectClass(i) + (' member_' + i),
+										key: i
+									}, m('span', v.name));
+								})),
+						]),
 					]),
 					m('div', {
-						id: 'team'
 					}, [
-						m('div', {
-							className: 'wrap' + (ctrl.shiftStopMotionForTeam() ? '' : ' loop')
-						}, ctrl.getTeams().map(function(v, i) {
-								return m('div', {
-									className: 'content' + (i == 0 ? ' scroll-end' : '') + (' team_' + i)
-								}, m('span', v.name));
-							})),
-					]),
-					m('div', {
-						id: 'member'
-					}, [
-						m('div', {
-							className: 'wrap' + (ctrl.shiftStopMotionForMember() ? '' : ' loop')
-						}, ctrl.getMembers().map(function(v, i) {
-								return m('div', {
-									className: 'content' + (i == 0 ? ' scroll-end' : '') + (' member_' + i)
-								}, m('span', v.name));
-							})),
-					]),
-				]),
-				m('div', {}, [
-					m('button', {
-						onclick: ctrl.startRoulette
-					}, 'ルーレットスタート'),
-					m('button', {
-						onclick: ctrl.stopRoulette
-					}, '止める')
+						m('button', {
+							className: 'btn btn-success btn-block btn-lg',
+							disabled: ctrl.cannotPushButton() ? 'disabled' : '',
+							onclick: function() {
+								if (ctrl.cannotPushButton()) {
+									return ;
+								}
+								if (ctrl.isScrolling()) {
+									ctrl.stopRoulette();
+								} else {
+									ctrl.startRoulette();
+								}
+							},
+						}, ctrl.isScrolling() ? 'ストップ' : 'ルーレットスタート'),
+					])
 				]),
 				m('div', {
 					style: ctrl.isFinished() ? '' : 'display: none;',
-					className: 'detected',
-					config: ns.random.effect.detect
+					className: 'detectedArea',
+					onclick: ctrl.startRoulette,
+					config: ns.effect.detect
 				})
-			])
+			];
 		}
 	};
 
 	// スクロール完了時に呼ばれる
-	ns.random.effect.scrollComplete = function($selected) {
+	ns.effect.scrollComplete = function($selected, name) {
 		m.startComputation();
 		var className = $selected.attr('class');
 		var extractSelectedNumber = function(str) {
@@ -257,15 +276,28 @@ var randomPicker = (function(ns) {
 		var vm = ns.random.vm;
 		switch(vm.tapCount) {
 			case 2:
-				console.log(extractSelectedNumber('division'));
 				vm.detectedDivision = vm._divisions[extractSelectedNumber('division')];
 				vm.detectedDivision.toDetermination();
+				// 次を止めるため
+				setTimeout(function() {
+					m.startComputation();
+					ns.random.vm.stopAnimation[1] = true;
+					ns.random.vm.tapCount = 1;
+					m.endComputation();
+				}, 1000);
 				break;
 			case 1:
 				vm.detectedTeam = _.filter(vm._teams, function(v) {
 					return v.canRemain();
 				})[extractSelectedNumber('team')];
 				vm.detectedTeam.toDetermination();
+				// 次を止めるため
+				setTimeout(function() {
+					m.startComputation();
+					ns.random.vm.stopAnimation[2] = true;
+					ns.random.vm.tapCount = 0;
+					m.endComputation();
+				}, 1000);
 				break;
 			case 0:
 				vm.detectedMember = _.filter(vm._members, function(v) {
@@ -274,13 +306,24 @@ var randomPicker = (function(ns) {
 				// 再度当選させないため、この人に印をつける
 				vm.detectedMember.isExcluded = true;
 				vm.detectedMember.toDetermination();
-				vm.isDetected = true;
+				// 次にすすめるために
+				setTimeout(function() {
+					m.startComputation();
+					vm.isDetected = true;
+					ns.random.vm.cannotPushButton = false;
+					m.endComputation();
+				}, 1000);
+				ns.random.vm.scrolling = false;
 				break;
 		}
-		vm.scroll = false;
 		m.endComputation();
-	}
+	};
 
+	ns.effect.scrollOneMore = function() {
+		m.startComputation();
+		// 適当に何処かをもう一度scroll
+		m.endComputation();
+	};
 
 	return ns;
 

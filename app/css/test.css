@@ -1,5 +1,5 @@
 div.wrap {
-	height: 300px;
+	height: 330px;
 	overflow-y: hidden;
 }
 
@@ -9,8 +9,12 @@ div.wrap {
 	display: -webkit-flex;
 	display: -ms-flexbox;
 	display: flex;
+	-webkit-box-pack: center;
+	-webkit-justify-content: center;
+	    -ms-flex-pack: center;
+	        justify-content: center;
 	position: relative;
-	margin-top: 20%;
+	border: solid 4px #dddddd;
 }
 #division {
 	width: calc(99% / 3);
@@ -21,21 +25,19 @@ div.wrap {
 #member {
 	width: calc(99% / 3);
 }
+div.wrap {
+	border: solid 1px #eeeeee;
+	box-shadow: inset 0px 4px 6px #999, inset 0px -4px 6px #999;
+}
 div.content {
-	height: calc(300px / 3);
+	height: calc(330px / 3);
+	height: 100px;
 	font-size: 2em;
 	text-align: center;
 	vertical-align: middle;
+	border: solid 1px #eeeeee;
 	padding-top: 15px;
 }
-div.detect-line {
-	position: absolute;
-	border: dashed 2px #0000ff;
-	width: 99%;
-	top: calc(300px / 3);
-	height: calc(300px / 3);
-}
-
 
 @-webkit-keyframes fly {
 	0% {
@@ -59,7 +61,6 @@ div.detect-line {
 		        transform: translate(0, 0);
 	}
 }
-
 
 @keyframes fly {
 	0% {
@@ -85,6 +86,10 @@ div.detect-line {
 }
 
 div.detected {
+	background-color: red;
+}
+
+div.detectedArea {
 	position: absolute;
 	z-index: -10;
 	top: 0px;

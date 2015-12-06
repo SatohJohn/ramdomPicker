@@ -79,7 +79,9 @@ var randomPicker = (function(ns) {
 	ns.model.Member.prototype.canRemain = function() {
 		return this.parent.isDetected();
 	};
-
+	ns.model.Member.prototype.getFullName = function() {
+		return this.parent.parent.name + ' ' + this.parent.name + ' ' + this.name;
+	};
 
 	ns.model.Winner = function(data) {
 		this.memberName = data.memberName;
