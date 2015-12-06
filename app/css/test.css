@@ -1,5 +1,5 @@
 div.wrap {
-	height: 330px;
+	height: 300px;
 	overflow-y: hidden;
 }
 
@@ -30,7 +30,7 @@ div.wrap {
 	box-shadow: inset 0px 4px 6px #999, inset 0px -4px 6px #999;
 }
 div.content {
-	height: calc(330px / 3);
+	height: calc(300px / 3);
 	height: 100px;
 	font-size: 2em;
 	text-align: center;

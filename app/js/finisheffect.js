@@ -1,13 +1,5 @@
 var randomPicker = (function(ns) {
 
-	/**
-	 * Returns a random integer between min (inclusive) and max (inclusive)
-	 * Using Math.round() will give you a non-uniform distribution!
-	 */
-	function getRandomInt(min, max) {
-		return Math.floor(Math.random() * (max - min + 1)) + min;
-	}
-
 	ns.effect = {
 		detect: function(element, isInitialized) {
 			if (isInitialized) {
@@ -40,12 +32,10 @@ var randomPicker = (function(ns) {
 					new PIXI.Text(word, style),
 					new PIXI.Text(word, style)
 				];
-				texts[0].position.x = width / 4;
-				texts[0].position.y = height / 2 - (fontSize + 40);
-				texts[1].position.x = width / 4;
-				texts[1].position.y = height / 2;
-				texts[2].position.x = width / 4;
-				texts[2].position.y = height / 2 + (fontSize + 40);
+				texts[0].position.x = texts[1].position.x = texts[2].position.x = width / 3;
+				texts[0].position.y = height / 2 - (fontSize + 40) * 2;
+				texts[1].position.y = height / 2 - (fontSize + 40) * 1;
+				texts[2].position.y = height / 2;
 				stage.addChild(texts[0]);
 				stage.addChild(texts[1]);
 				stage.addChild(texts[2]);
@@ -92,13 +82,8 @@ var randomPicker = (function(ns) {
 					axis: 'y',
 					complete: function(elements) {
 						if (isLast) {
-							// 1/3でもう一回
-//							if (getRandomInt(0, 2) % 2 == 1) {
-//								ns.effect.scrollOneMore($e.find('.scroll-end + div'));
-//							} else {
-								$e.find('.scroll-end + div').toggleClass('detected', true);
-								ns.effect.scrollComplete($e.find('.scroll-end + div'));
-//							}
+							$e.find('.scroll-end + div').toggleClass('detected', true);
+							ns.effect.scrollComplete($e.find('.scroll-end + div'));
 							return ;
 						}
 						if ($e.hasClass('loop') == true) {
@@ -113,11 +98,22 @@ var randomPicker = (function(ns) {
 			};
 			scroll(false);
 		},
+		animateScrollNext: function($e) {
+			var $e = $e;
+			$e.find('.pre-scroll-end').velocity('scroll', {
+				container: $e,
+				duration: 1000,
+				axis: 'y',
+				complete: function(elements) {
+					$e.find('.pre-scroll-end + div').toggleClass('detected', true);
+					ns.effect.scrollComplete($e.find('.pre-scroll-end + div'));
+				},
+				loop: false,
+				easing: 'linear'
+			});
+		},
 		scrollComplete: function(elements) {
 			console.log('scroll finish');
-		},
-		scrollOneMore: function(elements) {
-			console.log('scroll onemore');
 		}
 	}
 

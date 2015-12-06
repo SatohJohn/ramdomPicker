@@ -1,5 +1,13 @@
 var randomPicker = (function(ns) {
 
+	/**
+	 * Returns a random integer between min (inclusive) and max (inclusive)
+	 * Using Math.round() will give you a non-uniform distribution!
+	 */
+	function getRandomInt(min, max) {
+		return Math.floor(Math.random() * (max - min + 1)) + min;
+	}
+
 	var format = function(json) {
 		var result = [];
 		_.map(json, function(v) {
@@ -125,9 +133,9 @@ var randomPicker = (function(ns) {
 					// スロットの要素を一度作成しなければいけないので、一瞬待つ
 					setTimeout(function() {
 						$('div.content').toggleClass('detected', false);
-						ns.effect.animateScroll($('#division > div.loop'));
-						ns.effect.animateScroll($('#team > div.loop'));
-						ns.effect.animateScroll($('#member > div.loop'));
+						ns.effect.animateScroll($('#division > div'));
+						ns.effect.animateScroll($('#team > div'));
+						ns.effect.animateScroll($('#member > div'));
 					}, 10);
 					ns.random.vm.scrolling = true;
 				},
@@ -180,7 +188,7 @@ var randomPicker = (function(ns) {
 					return i == 2;
 				},
 				isPreDetectedNumber: function(i) {
-					return i == 3;
+					return i == 4;
 				},
 				isScrolling: function() {
 					return ns.random.vm.scrolling;
@@ -234,8 +242,8 @@ var randomPicker = (function(ns) {
 										className: 'content' + constructDetectClass(i) + (' member_' + i),
 										key: i
 									}, m('span', v.name));
-								})),
-						]),
+								}))
+						])
 					]),
 					m('div', {
 					}, [
@@ -269,14 +277,10 @@ var randomPicker = (function(ns) {
 	ns.effect.scrollComplete = function($selected, name) {
 		m.startComputation();
 		var className = $selected.attr('class');
-		var extractSelectedNumber = function(str) {
-			var r = new RegExp(str + '_[0-9]+');
-			return parseInt(_.first(r.exec(className)).substr((str + '_').length));
-		};
 		var vm = ns.random.vm;
 		switch(vm.tapCount) {
 			case 2:
-				vm.detectedDivision = vm._divisions[extractSelectedNumber('division')];
+				vm.detectedDivision = vm._divisions[extractSelectedNumber('division', className)];
 				vm.detectedDivision.toDetermination();
 				// 次を止めるため
 				setTimeout(function() {
@@ -289,7 +293,7 @@ var randomPicker = (function(ns) {
 			case 1:
 				vm.detectedTeam = _.filter(vm._teams, function(v) {
 					return v.canRemain();
-				})[extractSelectedNumber('team')];
+				})[extractSelectedNumber('team', className)];
 				vm.detectedTeam.toDetermination();
 				// 次を止めるため
 				setTimeout(function() {
@@ -300,29 +304,43 @@ var randomPicker = (function(ns) {
 				}, 1000);
 				break;
 			case 0:
-				vm.detectedMember = _.filter(vm._members, function(v) {
-					return v.canRemain();
-				})[extractSelectedNumber('member')];
-				// 再度当選させないため、この人に印をつける
-				vm.detectedMember.isExcluded = true;
-				vm.detectedMember.toDetermination();
-				// 次にすすめるために
-				setTimeout(function() {
-					m.startComputation();
-					vm.isDetected = true;
-					ns.random.vm.cannotPushButton = false;
-					m.endComputation();
-				}, 1000);
-				ns.random.vm.scrolling = false;
+				if (getRandomInt(0,2) % 2 == 1) {
+					setTimeout(function() {
+						m.startComputation();
+						$selected.toggleClass('detected', false);
+						ns.effect.animateScrollNext($('#member > div'));
+						m.endComputation();
+					}, 2000);
+				} else {
+					end($selected);
+				}
 				break;
 		}
 		m.endComputation();
 	};
 
-	ns.effect.scrollOneMore = function() {
-		m.startComputation();
-		// 適当に何処かをもう一度scroll
-		m.endComputation();
+	var extractSelectedNumber = function(str, className) {
+		var r = new RegExp(str + '_[0-9]+');
+		return parseInt(_.first(r.exec(className)).substr((str + '_').length));
+	};
+
+	var end = function($selected) {
+		var className = $selected.attr('class');
+		var vm = ns.random.vm;
+		vm.detectedMember = _.filter(vm._members, function(v) {
+			return v.canRemain();
+		})[extractSelectedNumber('member', className)];
+		// 再度当選させないため、この人に印をつける
+		vm.detectedMember.isExcluded = true;
+		vm.detectedMember.toDetermination();
+		// 次にすすめるために
+		setTimeout(function() {
+			m.startComputation();
+			vm.isDetected = true;
+			ns.random.vm.cannotPushButton = false;
+			m.endComputation();
+		}, 2000);
+		ns.random.vm.scrolling = false;
 	};
 
 	return ns;
