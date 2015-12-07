@@ -18,24 +18,27 @@ var randomPicker = (function(ns) {
 					new PIXI.Sprite(resources.b.texture),
 					new PIXI.Sprite(resources.c.texture)
 				];
-				sprites[0].position.x = 800;
+				sprites[0].position.x = 1000;
 				sprites[0].position.y = 50;
 				sprites[1].position.x = 100;
 				sprites[1].position.y = 400;
 				sprites[2].position.x = 1000;
 				sprites[2].position.y = 600;
 				var word = '';  // 文字列を指定
-				var fontSize = 60;
+				var fontSize = 80;
+				var margin = 60;
 				var style = {font:'bold ' + fontSize + 'pt Arial', fill:'black'}; // 文字サイズや色など
 				var texts = [
 					new PIXI.Text(word, style),
 					new PIXI.Text(word, style),
+					new PIXI.Text(word, style),
 					new PIXI.Text(word, style)
 				];
-				texts[0].position.x = texts[1].position.x = texts[2].position.x = width / 3;
-				texts[0].position.y = height / 2 - (fontSize + 40) * 2;
-				texts[1].position.y = height / 2 - (fontSize + 40) * 1;
+				texts[0].position.x = texts[1].position.x = texts[2].position.x = texts[3].position.x = width / 3;
+				texts[0].position.y = height / 2 - (fontSize + margin) * 2;
+				texts[1].position.y = height / 2 - (fontSize + margin) * 1;
 				texts[2].position.y = height / 2;
+				texts[3].position.y = height / 2 + (fontSize + margin) * 1;
 				stage.addChild(texts[0]);
 				stage.addChild(texts[1]);
 				stage.addChild(texts[2]);
@@ -57,6 +60,7 @@ var randomPicker = (function(ns) {
 					texts[0].text = ns.random.vm.detectedDivision.name == null ? '' : ns.random.vm.detectedDivision.name;
 					texts[1].text = ns.random.vm.detectedTeam.name == null ? '' : ns.random.vm.detectedTeam.name;
 					texts[2].text = ns.random.vm.detectedMember.name == null ? '' : ns.random.vm.detectedMember.name + ' さん';
+					texts[3].text = ns.random.vm.detectedMember.name == null ? '' : ns.random.vm.detectedMember.tableNumber + ' テーブル';
 					renderer.render(stage);
 				}
 				animate();
@@ -78,12 +82,17 @@ var randomPicker = (function(ns) {
 				$e.scrollTop($e.children().length * 100);
 				$e.find('.scroll-end').velocity('scroll', {
 					container: $e,
-					duration: isLast ? 1000 : 600,
+					duration: isLast ? 2000 : 1500,
 					axis: 'y',
 					complete: function(elements) {
 						if (isLast) {
 							$e.find('.scroll-end + div').toggleClass('detected', true);
-							ns.effect.scrollComplete($e.find('.scroll-end + div'));
+							$e.find('.scroll-end + div span')
+								.toggleClass('animated flash', true)
+								.one('webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend', function() {
+									$e.find('.scroll-end + div span').toggleClass('animated flash', false);
+								});
+							ns.effect.scrollComplete($e.find('.scroll-end + div'), false);
 							return ;
 						}
 						if ($e.hasClass('loop') == true) {
@@ -102,11 +111,16 @@ var randomPicker = (function(ns) {
 			var $e = $e;
 			$e.find('.pre-scroll-end').velocity('scroll', {
 				container: $e,
-				duration: 1000,
+				duration: 4000,
 				axis: 'y',
 				complete: function(elements) {
 					$e.find('.pre-scroll-end + div').toggleClass('detected', true);
-					ns.effect.scrollComplete($e.find('.pre-scroll-end + div'));
+					$e.find('.pre-scroll-end + div span')
+						.toggleClass('animated flash', true)
+						.one('webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend', function() {
+							$e.find('.pre-scroll-end + div span').toggleClass('animated flash', false);
+						});
+					ns.effect.scrollComplete($e.find('.pre-scroll-end + div'), true);
 				},
 				loop: false,
 				easing: 'linear'

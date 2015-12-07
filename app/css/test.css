@@ -1,5 +1,5 @@
 div.wrap {
-	height: 300px;
+	height: 700px;
 	overflow-y: hidden;
 }
 
@@ -30,63 +30,20 @@ div.wrap {
 	box-shadow: inset 0px 4px 6px #999, inset 0px -4px 6px #999;
 }
 div.content {
-	height: calc(300px / 3);
-	height: 100px;
-	font-size: 2em;
+	height: calc(700px / 3);
+	border: solid 1px #eeeeee;
 	text-align: center;
 	vertical-align: middle;
-	border: solid 1px #eeeeee;
-	padding-top: 15px;
+	padding: auto;
 }
-
-@-webkit-keyframes fly {
-	0% {
-		-webkit-transform: translate(0, 0);
-		        transform: translate(0, 0);
-	}
-	25% {
-		-webkit-transform: translate(0, 50);
-		        transform: translate(0, 50);
-	}
-	50% {
-		-webkit-transform: translate(0, 0);
-		        transform: translate(0, 0);
-	}
-	75% {
-		-webkit-transform: translate(0, -50);
-		        transform: translate(0, -50);
-	}
-	100% {
-		-webkit-transform: translate(0, 0);
-		        transform: translate(0, 0);
-	}
-}
-
-@keyframes fly {
-	0% {
-		-webkit-transform: translate(0, 0);
-		        transform: translate(0, 0);
-	}
-	25% {
-		-webkit-transform: translate(0, 50);
-		        transform: translate(0, 50);
-	}
-	50% {
-		-webkit-transform: translate(0, 0);
-		        transform: translate(0, 0);
-	}
-	75% {
-		-webkit-transform: translate(0, -50);
-		        transform: translate(0, -50);
-	}
-	100% {
-		-webkit-transform: translate(0, 0);
-		        transform: translate(0, 0);
-	}
+div.content span {
+	margin: auto;
+	font-size: 60px;
 }
 
 div.detected {
-	background-color: red;
+	color: white;
+	background-color: #4169e1;
 }
 
 div.detectedArea {

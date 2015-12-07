@@ -61,10 +61,11 @@ var randomPicker = (function(ns) {
 					ns.random.vm.formattedResult = result.map(function(val) {
 						return new ns.model.Division(val);
 					});
-					console.log(ns.random.vm.formattedResult);
 					ns.random.vm.divisions = ns.random.vm.formattedResult;
 					ns.random.vm.teams = _.flatten(_.pluck(ns.random.vm.divisions, 'children'));
 					ns.random.vm.members = _.flatten(_.pluck(ns.random.vm.teams, 'children'));
+					ns.random.vm.teams = _.map(ns.random.vm.members, function(v) { return v.parent; });
+					ns.random.vm.divisions = _.map(ns.random.vm.members, function(v) { return v.parent.parent; });
 				});
 				ns.random.vm.winner = new ns.model.Winner({
 					memberName: '',
@@ -274,7 +275,7 @@ var randomPicker = (function(ns) {
 	};
 
 	// スクロール完了時に呼ばれる
-	ns.effect.scrollComplete = function($selected, name) {
+	ns.effect.scrollComplete = function($selected, isLast) {
 		m.startComputation();
 		var className = $selected.attr('class');
 		var vm = ns.random.vm;
@@ -304,7 +305,7 @@ var randomPicker = (function(ns) {
 				}, 1000);
 				break;
 			case 0:
-				if (getRandomInt(0,2) % 2 == 1) {
+				if (isLast == false && getRandomInt(0,100) % 2 == 1) {
 					setTimeout(function() {
 						m.startComputation();
 						$selected.toggleClass('detected', false);
