@@ -17,7 +17,8 @@ var randomPicker = (function(ns) {
 					name: v.team,
 					children: [{
 						name: v.name,
-						isExcluded: v.exclude
+						isExcluded: v.exclude,
+						tableNumber: v.tableNumber
 					}]
 				}]
 			};
@@ -44,7 +45,6 @@ var randomPicker = (function(ns) {
 				res2.children.push(_.first(_.first(r.children).children));
 				return;
 			}
-			console.log('同じ事業部に同じチームの同じ名前の人いるで！');
 		}, result);
 		return result;
 	};
@@ -330,8 +330,16 @@ var randomPicker = (function(ns) {
 		vm.detectedMember = _.filter(vm._members, function(v) {
 			return v.canRemain();
 		})[extractSelectedNumber('member', className)];
+
 		// 再度当選させないため、この人に印をつける
-		vm.detectedMember.isExcluded = true;
+		vm.detectedMember.exclude();
+		_.each(vm.members, function(v) {
+			console.log(v);
+			if (v.tableNumber == vm.detectedMember.tableNumber) {
+				v.exclude();
+			}
+		});
+
 		vm.detectedMember.toDetermination();
 		// 次にすすめるために
 		setTimeout(function() {

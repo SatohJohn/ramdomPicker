@@ -62,10 +62,14 @@ var randomPicker = (function(ns) {
 		this.parent = data.parent;
 		this.primary = data.primary;
 		this.determination = false;
+		this.tableNumber = data.tableNumber;
 		this.isExcluded = data.isExcluded == '○';
 	};
 	ns.model.Member.prototype.isCandidate = function() {
 		return this.isExcluded == false;
+	};
+	ns.model.Member.prototype.exclude = function() {
+		this.isExcluded = true;
 	};
 	ns.model.Member.prototype.isDetected = function() {
 		return this.determination;

@@ -4,307 +4,351 @@
     "team": "Uチーム",
     "name": "A1",
     "attend": "○",
-    "exclude": "×"
+    "exclude": "×",
+    "tableNumber": "1"
   },
   {
     "division": "プリ",
     "team": "Uチーム",
     "name": "A2",
     "attend": "○",
-    "exclude": "×"
+    "exclude": "×",
+    "tableNumber": "2"
   },
   {
     "division": "プリ",
     "team": "Uチーム",
     "name": "A3",
     "attend": "○",
-    "exclude": "×"
+    "exclude": "×",
+    "tableNumber": "3"
   },
   {
     "division": "プリ",
     "team": "Sチーム",
     "name": "B1",
     "attend": "○",
-    "exclude": "×"
+    "exclude": "×",
+    "tableNumber": "1"
   },
   {
     "division": "プリ",
     "team": "Sチーム",
     "name": "B2",
     "attend": "○",
-    "exclude": "×"
+    "exclude": "×",
+    "tableNumber": "2"
   },
   {
     "division": "プリ",
     "team": "Sチーム",
     "name": "B3",
     "attend": "○",
-    "exclude": "×"
+    "exclude": "×",
+    "tableNumber": "3"
   },
   {
     "division": "プリ",
     "team": "Sチーム",
     "name": "B4",
     "attend": "○",
-    "exclude": "×"
+    "exclude": "×",
+    "tableNumber": "4"
   },
   {
     "division": "プリ",
     "team": "Rチーム",
     "name": "C1",
     "attend": "○",
-    "exclude": "×"
+    "exclude": "×",
+    "tableNumber": "1"
   },
   {
     "division": "プリ",
     "team": "Rチーム",
     "name": "C2",
     "attend": "○",
-    "exclude": "×"
+    "exclude": "×",
+    "tableNumber": "2"
   },
   {
     "division": "プリ",
     "team": "Rチーム",
     "name": "C3",
     "attend": "○",
-    "exclude": "×"
+    "exclude": "×",
+    "tableNumber": "3"
   },
   {
     "division": "プリ",
     "team": "Rチーム",
     "name": "C4",
     "attend": "○",
-    "exclude": "×"
+    "exclude": "×",
+    "tableNumber": "4"
   },
   {
     "division": "プリ",
     "team": "Rチーム",
     "name": "C5",
     "attend": "○",
-    "exclude": "×"
+    "exclude": "×",
+    "tableNumber": "5"
   },
   {
     "division": "CM1",
     "team": "フォーチュンチーム",
     "name": "D1",
     "attend": "○",
-    "exclude": "×"
+    "exclude": "×",
+    "tableNumber": "1"
   },
   {
     "division": "CM1",
     "team": "フォーチュンチーム",
     "name": "D2",
     "attend": "○",
-    "exclude": "×"
+    "exclude": "×",
+    "tableNumber": "2"
   },
   {
     "division": "CM1",
     "team": "フォーチュンチーム",
     "name": "D3",
     "attend": "○",
-    "exclude": "×"
+    "exclude": "×",
+    "tableNumber": "3"
   },
   {
     "division": "CM1",
     "team": "フォーチュンチーム",
     "name": "D4",
     "attend": "○",
-    "exclude": "×"
+    "exclude": "×",
+    "tableNumber": "4"
   },
   {
     "division": "CM1",
     "team": "フォーチュンチーム",
     "name": "D5",
     "attend": "○",
-    "exclude": "×"
+    "exclude": "×",
+    "tableNumber": "5"
   },
   {
     "division": "CM1",
     "team": "ログチーム",
     "name": "D1",
     "attend": "○",
-    "exclude": "×"
+    "exclude": "×",
+    "tableNumber": "1"
   },
   {
     "division": "CM1",
     "team": "ログチーム",
     "name": "D2",
     "attend": "○",
-    "exclude": "×"
+    "exclude": "×",
+    "tableNumber": "2"
   },
   {
     "division": "CM1",
     "team": "ログチーム",
     "name": "D3",
     "attend": "○",
-    "exclude": "×"
+    "exclude": "×",
+    "tableNumber": "3"
   },
   {
     "division": "CM1",
     "team": "ログチーム",
     "name": "D4",
     "attend": "○",
-    "exclude": "×"
+    "exclude": "×",
+    "tableNumber": "4"
   },
   {
     "division": "CM1",
     "team": "ログチーム",
     "name": "D5",
     "attend": "○",
-    "exclude": "×"
+    "exclude": "×",
+    "tableNumber": "5"
   },
   {
     "division": "SG1",
     "team": "チーム1",
     "name": "E1",
     "attend": "○",
-    "exclude": "×"
+    "exclude": "×",
+    "tableNumber": "1"
   },
   {
     "division": "SG1",
     "team": "チーム1",
     "name": "E2",
     "attend": "○",
-    "exclude": "×"
+    "exclude": "×",
+    "tableNumber": "2"
   },
   {
     "division": "SG1",
     "team": "チーム1",
     "name": "E3",
     "attend": "○",
-    "exclude": "×"
+    "exclude": "×",
+    "tableNumber": "3"
   },
   {
     "division": "SG1",
     "team": "チーム1",
     "name": "E4",
     "attend": "○",
-    "exclude": "×"
+    "exclude": "×",
+    "tableNumber": "4"
   },
   {
     "division": "SG1",
     "team": "チーム1",
     "name": "E5",
     "attend": "○",
-    "exclude": "×"
+    "exclude": "×",
+    "tableNumber": "5"
   },
   {
     "division": "SG1",
     "team": "チーム1",
     "name": "E6",
     "attend": "○",
-    "exclude": "×"
+    "exclude": "×",
+    "tableNumber": "6"
   },
   {
     "division": "SG1",
     "team": "チーム2",
     "name": "E1",
     "attend": "○",
-    "exclude": "×"
+    "exclude": "×",
+    "tableNumber": "1"
   },
   {
     "division": "SG1",
     "team": "チーム2",
     "name": "E2",
     "attend": "○",
-    "exclude": "×"
+    "exclude": "×",
+    "tableNumber": "2"
   },
   {
     "division": "SG1",
     "team": "チーム2",
     "name": "E3",
     "attend": "○",
-    "exclude": "×"
+    "exclude": "×",
+    "tableNumber": "3"
   },
   {
     "division": "SG1",
     "team": "チーム2",
     "name": "E4",
     "attend": "○",
-    "exclude": "×"
+    "exclude": "×",
+    "tableNumber": "4"
   },
   {
     "division": "SG1",
     "team": "チーム2",
     "name": "E5",
     "attend": "○",
-    "exclude": "×"
+    "exclude": "×",
+    "tableNumber": "5"
   },
   {
     "division": "SG1",
     "team": "チーム2",
     "name": "E6",
     "attend": "○",
-    "exclude": "×"
+    "exclude": "×",
+    "tableNumber": "6"
   },
   {
     "division": "SG2",
     "team": "チーム1",
     "name": "F1",
     "attend": "○",
-    "exclude": "×"
+    "exclude": "×",
+    "tableNumber": "1"
   },
   {
     "division": "SG2",
     "team": "チーム1",
     "name": "F2",
     "attend": "○",
-    "exclude": "×"
+    "exclude": "×",
+    "tableNumber": "2"
   },
   {
     "division": "SG2",
     "team": "チーム1",
     "name": "F3",
     "attend": "○",
-    "exclude": "×"
+    "exclude": "×",
+    "tableNumber": "3"
   },
   {
     "division": "SG2",
     "team": "チーム1",
     "name": "F4",
     "attend": "○",
-    "exclude": "×"
+    "exclude": "×",
+    "tableNumber": "4"
   },
   {
     "division": "SG2",
     "team": "チーム2",
     "name": "G1",
     "attend": "○",
-    "exclude": "×"
+    "exclude": "×",
+    "tableNumber": "1"
   },
   {
     "division": "SG2",
     "team": "チーム2",
     "name": "G2",
     "attend": "○",
-    "exclude": "×"
+    "exclude": "×",
+    "tableNumber": "2"
   },
   {
     "division": "SG2",
     "team": "チーム2",
     "name": "G3",
     "attend": "○",
-    "exclude": "×"
+    "exclude": "×",
+    "tableNumber": "3"
   },
   {
     "division": "SG2",
     "team": "チーム2",
     "name": "G4",
     "attend": "○",
-    "exclude": "×"
+    "exclude": "×",
+    "tableNumber": "4"
   },
   {
     "division": "SG2",
     "team": "チーム2",
     "name": "G5",
     "attend": "○",
-    "exclude": "×"
+    "exclude": "×",
+    "tableNumber": "5"
   },
   {
     "division": "SG2",
     "team": "チーム2",
     "name": "G6",
     "attend": "○",
-    "exclude": "×"
+    "exclude": "×",
+    "tableNumber": "6"
   }
 ]
