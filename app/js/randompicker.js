@@ -67,17 +67,34 @@ var randomPicker = (function(ns) {
 					ns.random.vm.teams = _.map(ns.random.vm.members, function(v) { return v.parent; });
 					ns.random.vm.divisions = _.map(ns.random.vm.members, function(v) { return v.parent.parent; });
 				});
-				ns.random.vm.winner = new ns.model.Winner({
-					memberName: '',
-					teamName: '',
-					divisionName: ''
-				});
-				ns.random.vm.preWinner = new ns.model.Winner({
-					memberName: '',
-					teamName: '',
-					divisionName: ''
-				});
 				ns.random.vm.rouletteTime(ns.random.vm.initRouletteTime);
+				ns.random.vm.detectionSequence = (function() {
+					var sequenceNumber = 3;
+					return {
+						init: function() {
+							sequenceNumber = 3;
+						},
+						next: function() {
+							setTimeout(function() {
+								m.startComputation();
+								sequenceNumber--;
+								m.endComputation();
+							}, 1000);
+						},
+						isStopDivisionScroll: function() {
+							return sequenceNumber <= 2;
+						},
+						isStopTeamScroll: function() {
+							return sequenceNumber <= 1;
+						},
+						isStopMemberScroll: function() {
+							return sequenceNumber <= 0;
+						},
+						stroke: function() {
+							arguments[2 - sequenceNumber]();
+						}
+					};
+				})();
 			},
 			rouletteTime: m.prop(0),
 			initRouletteTime: 100,
@@ -91,68 +108,26 @@ var randomPicker = (function(ns) {
 			detectedDivision: {},
 			detectedTeam: {},
 			detectedMember: {},
-			stopAnimation: [false, false, false],
-			tapCount: 3,
 			isDetected: false,
 			scrolling: false,
-			cannotPushButton: false
+			gameCount: 0,
+			toFake: function() {
+				if (ns.random.vm.gameCount - 1 < 0 || ns.random.vm.gameCount - 1 > 5) {
+					console.log('game Count : ', ns.random.vm.gameCount);
+					alert('ゲーム終了！');
+					return ;
+				}
+				return arguments[ns.random.vm.gameCount - 1]();
+			}
 		},
 		controller: function() {
 			ns.random.vm.init();
-			var createDisplayedList = function(l) {
-				return _.flatten([l, l, l, l, l, l]);
-			};
 			return {
 				startRoulette: function() {
-					ns.random.vm.stopAnimation = [false, false, false];
-					ns.random.vm.tapCount = 3;
-
-					ns.random.vm.isDetected = false;
-
-					ns.random.vm.detectedDivision = {};
-					ns.random.vm.detectedTeam = {};
-					ns.random.vm.detectedMember = {};
-					ns.random.vm.cannotPushButton = false;
-
-					ns.random.vm.members = _.shuffle(ns.random.vm.members).filter(function(v) {
-						v.unsetDetermination();
-						return v.isCandidate();
-					});
-					ns.random.vm.teams = _.shuffle(ns.random.vm.teams).filter(function(v) {
-						v.unsetDetermination();
-						return v.isCandidate();
-					});
-					ns.random.vm.divisions = _.shuffle(ns.random.vm.divisions).filter(function(v) {
-						v.unsetDetermination();
-						return v.isCandidate();
-					});
-
-					ns.random.vm._divisions = createDisplayedList(ns.random.vm.divisions);
-					ns.random.vm._teams = createDisplayedList(ns.random.vm.teams);
-					ns.random.vm._members = createDisplayedList(ns.random.vm.members);
-
-					// スロットの要素を一度作成しなければいけないので、一瞬待つ
-					setTimeout(function() {
-						$('div.content').toggleClass('detected', false);
-						ns.effect.animateScroll($('#division > div'));
-						ns.effect.animateScroll($('#team > div'));
-						ns.effect.animateScroll($('#member > div'));
-					}, 10);
-					ns.random.vm.scrolling = true;
-				},
-				stopRoulette: function() {
-					ns.random.vm.cannotPushButton = true;
-					ns.random.vm.stopAnimation[0] = true;
-					ns.random.vm.tapCount = 2;
+					restartRoulette();
 				},
 				isDetected: function() {
 					return ns.random.vm.isDetected;
-				},
-				getWinner: function() {
-					return ns.random.vm.winner;
-				},
-				winners: function() {
-					return ns.random.vm.winners;
 				},
 				getDivisions: function() {
 					return ns.random.vm._divisions;
@@ -174,37 +149,50 @@ var randomPicker = (function(ns) {
 					});
 				},
 				shiftStopMotionForDivision: function() {
-					return ns.random.vm.stopAnimation[0];
+					return ns.random.vm.detectionSequence.isStopDivisionScroll();
 				},
 				shiftStopMotionForTeam: function() {
-					return ns.random.vm.stopAnimation[1];
+					return ns.random.vm.detectionSequence.isStopTeamScroll();
 				},
 				shiftStopMotionForMember: function() {
-					return ns.random.vm.stopAnimation[2];
+					return ns.random.vm.detectionSequence.isStopMemberScroll();
 				},
 				isFinished: function() {
 					return ns.random.vm.isDetected;
 				},
 				isDetectedNumber: function(i) {
-					return i == 2;
+					return ns.random.vm.toFake(
+						function() { return i == 2; },
+						function() { return i == 2; },
+						function() { return i == 2; },
+						function() { return i == 2; },
+						function() { return i == 2; },
+						function() { return i == 2; }
+					);
 				},
-				isPreDetectedNumber: function(i) {
-					return i == 4;
+				isDetectedNumberToFake: function(i) {
+					return ns.random.vm.toFake(
+						function() { return false; },
+						function() { return false; },
+						function() { return i == 3; },
+						function() { return i == 5; },
+						function() { return false; },
+						function() { return i == 4; }
+					);
 				},
 				isScrolling: function() {
 					return ns.random.vm.scrolling;
 				},
-				cannotPushButton: function() {
-					return ns.random.vm.cannotPushButton;
-				}
+				stopRoulette: function() {}
 			};
 		},
 		view: function(ctrl) {
 			var constructDetectClass = function(i) {
-				return (ctrl.isDetectedNumber(i) ? ' scroll-end' : '') + (ctrl.isPreDetectedNumber(i) ? ' pre-scroll-end' : '');
+				return (ctrl.isDetectedNumber(i) ? ' scroll-end' : '') + (ctrl.isDetectedNumberToFake(i) ? ' pre-scroll-end' : '');
 			};
 			return [m('div', {
 					style: ctrl.isFinished() ? 'display: none;' : '',
+					onclick: ctrl.isScrolling() ? ctrl.stopRoulette : ctrl.startRoulette
 				}, [
 					m('div', {
 						id: 'container'
@@ -245,23 +233,6 @@ var randomPicker = (function(ns) {
 									}, m('span', v.name));
 								}))
 						])
-					]),
-					m('div', {
-					}, [
-						m('button', {
-							className: 'btn btn-success btn-block btn-lg',
-							disabled: ctrl.cannotPushButton() ? 'disabled' : '',
-							onclick: function() {
-								if (ctrl.cannotPushButton()) {
-									return ;
-								}
-								if (ctrl.isScrolling()) {
-									ctrl.stopRoulette();
-								} else {
-									ctrl.startRoulette();
-								}
-							},
-						}, ctrl.isScrolling() ? 'ストップ' : 'ルーレットスタート'),
 					])
 				]),
 				m('div', {
@@ -279,45 +250,61 @@ var randomPicker = (function(ns) {
 		m.startComputation();
 		var className = $selected.attr('class');
 		var vm = ns.random.vm;
-		switch(vm.tapCount) {
-			case 2:
-				vm.detectedDivision = vm._divisions[extractSelectedNumber('division', className)];
-				vm.detectedDivision.toDetermination();
-				// 次を止めるため
-				setTimeout(function() {
-					m.startComputation();
-					ns.random.vm.stopAnimation[1] = true;
-					ns.random.vm.tapCount = 1;
-					m.endComputation();
-				}, 1000);
-				break;
-			case 1:
-				vm.detectedTeam = _.filter(vm._teams, function(v) {
-					return v.canRemain();
-				})[extractSelectedNumber('team', className)];
-				vm.detectedTeam.toDetermination();
-				// 次を止めるため
-				setTimeout(function() {
-					m.startComputation();
-					ns.random.vm.stopAnimation[2] = true;
-					ns.random.vm.tapCount = 0;
-					m.endComputation();
-				}, 1000);
-				break;
-			case 0:
-				if (isLast == false && getRandomInt(0,100) % 2 == 1) {
-					setTimeout(function() {
-						m.startComputation();
-						$selected.toggleClass('detected', false);
-						ns.effect.animateScrollNext($('#member > div'));
-						m.endComputation();
-					}, 2000);
-				} else {
-					end($selected);
-				}
-				break;
-		}
+		vm.detectionSequence.stroke(function() {
+			vm.detectedDivision = vm._divisions[extractSelectedNumber('division', className)];
+			vm.detectedDivision.toDetermination();
+			ns.random.vm.detectionSequence.next();
+		}, function() {
+			vm.detectedTeam = _.filter(vm._teams, function(v) {
+				return v.canRemain();
+			})[extractSelectedNumber('team', className)];
+			vm.detectedTeam.toDetermination();
+			ns.random.vm.detectionSequence.next();
+		}, function() {
+			if (isLast == true) {
+				end($selected);
+			} else {
+				extra($selected);
+			}
+		});
 		m.endComputation();
+	};
+	
+	
+	// エクストラステージ
+	var extra = function($selected) {
+		ns.random.vm.toFake(
+			function() { end($selected); }, function() { end($selected); },
+			function() {
+				// １個ずらし
+				setTimeout(function() {
+					$selected.toggleClass('detected', false);
+					ns.effect.animateScrollTo($('#member > div'), '.pre-scroll-end');
+				}, 2000);
+			},
+			function() {
+				setTimeout(function() {
+					$selected.toggleClass('detected', false);
+					ns.effect.animateScrollTo($('#member > div'), '.pre-scroll-end');
+				}, 2000);
+			},
+			function() {
+				// もう一度回す
+				setTimeout(function() {
+					m.startComputation();
+					restartRoulette();
+					m.endComputation();
+				}, 5000);
+			},
+			function() {
+				setTimeout(function() {
+					m.startComputation();
+					$selected.toggleClass('detected', false);
+					ns.effect.animateScrollTo($('#member > div'), '.pre-scroll-end');
+					m.endComputation();
+				}, 2000);
+			}
+		);
 	};
 
 	var extractSelectedNumber = function(str, className) {
@@ -346,10 +333,51 @@ var randomPicker = (function(ns) {
 		setTimeout(function() {
 			m.startComputation();
 			vm.isDetected = true;
-			ns.random.vm.cannotPushButton = false;
 			m.endComputation();
 		}, 2000);
 		ns.random.vm.scrolling = false;
+	};
+	
+	var restartRoulette = function() {
+		ns.random.vm.isDetected = false;
+
+		ns.random.vm.detectedDivision = {};
+		ns.random.vm.detectedTeam = {};
+		ns.random.vm.detectedMember = {};
+
+		ns.random.vm.members = _.shuffle(ns.random.vm.members).filter(function(v) {
+			v.unsetDetermination();
+			return v.isCandidate();
+		});
+		ns.random.vm.teams = _.shuffle(ns.random.vm.teams).filter(function(v) {
+			v.unsetDetermination();
+			return v.isCandidate();
+		});
+		ns.random.vm.divisions = _.shuffle(ns.random.vm.divisions).filter(function(v) {
+			v.unsetDetermination();
+			return v.isCandidate();
+		});
+
+		var createDisplayedList = function(l) {
+			return _.flatten([l, l, l, l]);
+		};
+		ns.random.vm._divisions = createDisplayedList(ns.random.vm.divisions);
+		ns.random.vm._teams = createDisplayedList(ns.random.vm.teams);
+		ns.random.vm._members = createDisplayedList(ns.random.vm.members);
+
+		ns.random.vm.gameCount++;
+
+		// スロットの要素を一度作成しなければいけないので、一瞬待つ
+		setTimeout(function() {
+			$('div.content').toggleClass('detected', false);
+			ns.effect.animateScroll($('#division > div'));
+			ns.effect.animateScroll($('#team > div'));
+			ns.effect.animateScroll($('#member > div'));
+		}, 10);
+		ns.random.vm.detectionSequence.init();
+		ns.random.vm.scrolling = true;
+		
+		setTimeout(ns.random.vm.detectionSequence.next, 3000);
 	};
 
 	return ns;

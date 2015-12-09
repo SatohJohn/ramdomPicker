@@ -1,5 +1,7 @@
 var randomPicker = (function(ns) {
 
+	var stage = null;
+
 	ns.effect = {
 		detect: function(element, isInitialized) {
 			if (isInitialized) {
@@ -11,19 +13,14 @@ var randomPicker = (function(ns) {
 				backgroundColor: 0xFFFFFF
 			});
 			$(element).append(renderer.view);
-			var stage = new PIXI.Container();
+			stage = new PIXI.Container();
 			PIXI.loader.add('a', '/img/a1.gif').add('b', '/img/b1.gif').add('c', '/img/c1.gif').load(function (loader, resources) {
-				var sprites = [
-					new PIXI.Sprite(resources.a.texture),
-					new PIXI.Sprite(resources.b.texture),
-					new PIXI.Sprite(resources.c.texture)
+				var angels = [
+					new Angel(resources.a.texture, 0),
+					new Angel(resources.b.texture, 1),
+					new Angel(resources.c.texture, 2)
 				];
-				sprites[0].position.x = 1000;
-				sprites[0].position.y = 50;
-				sprites[1].position.x = 100;
-				sprites[1].position.y = 400;
-				sprites[2].position.x = 1000;
-				sprites[2].position.y = 600;
+
 				var word = '';  // 文字列を指定
 				var fontSize = 80;
 				var margin = 60;
@@ -42,20 +39,12 @@ var randomPicker = (function(ns) {
 				stage.addChild(texts[0]);
 				stage.addChild(texts[1]);
 				stage.addChild(texts[2]);
-				stage.addChild(sprites[0]);
-				stage.addChild(sprites[1]);
-				stage.addChild(sprites[2]);
 				function animate() {
 					requestAnimationFrame(animate);
 					var time = new Date().getTime();
-					sprites[0].position.x += Math.sin(time / 13 * (Math.PI / 180)) * 2;
-					sprites[0].position.y += Math.sin(time / 5 * (Math.PI / 180)) * 2;
-
-					sprites[1].position.x += Math.cos(time / 13 * (Math.PI / 180)) * 2;
-					sprites[1].position.y += Math.cos(time / 7 * (Math.PI / 180)) * 2;
-
-					sprites[2].position.x += Math.sin(time / 18 * (Math.PI / 180)) * 3;
-					sprites[2].position.y += Math.sin(time / 6 * (Math.PI / 180)) * 2;
+					_.each(angels, function (v) {
+						v.move(time);
+					});
 
 					texts[0].text = ns.random.vm.detectedDivision.name == null ? '' : ns.random.vm.detectedDivision.name;
 					texts[1].text = ns.random.vm.detectedTeam.name == null ? '' : ns.random.vm.detectedTeam.name;
@@ -86,13 +75,10 @@ var randomPicker = (function(ns) {
 					axis: 'y',
 					complete: function(elements) {
 						if (isLast) {
-							$e.find('.scroll-end + div').toggleClass('detected', true);
-							$e.find('.scroll-end + div span')
-								.toggleClass('animated flash', true)
-								.one('webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend', function() {
-									$e.find('.scroll-end + div span').toggleClass('animated flash', false);
-								});
-							ns.effect.scrollComplete($e.find('.scroll-end + div'), false);
+							var $div = $e.find('.scroll-end + div');
+							$div.toggleClass('detected', true);
+							detectAnimate($div.find('span'));
+							ns.effect.scrollComplete($div, false);
 							return ;
 						}
 						if ($e.hasClass('loop') == true) {
@@ -107,20 +93,17 @@ var randomPicker = (function(ns) {
 			};
 			scroll(false);
 		},
-		animateScrollNext: function($e) {
+		animateScrollTo: function($e, selector) {
 			var $e = $e;
-			$e.find('.pre-scroll-end').velocity('scroll', {
+			$e.find(selector).velocity('scroll', {
 				container: $e,
 				duration: 4000,
 				axis: 'y',
 				complete: function(elements) {
-					$e.find('.pre-scroll-end + div').toggleClass('detected', true);
-					$e.find('.pre-scroll-end + div span')
-						.toggleClass('animated flash', true)
-						.one('webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend', function() {
-							$e.find('.pre-scroll-end + div span').toggleClass('animated flash', false);
-						});
-					ns.effect.scrollComplete($e.find('.pre-scroll-end + div'), true);
+					var $div = $e.find(selector + ' + div');
+					$div.toggleClass('detected', true);
+					detectAnimate($div.find('span'));
+					ns.effect.scrollComplete($div, true);
 				},
 				loop: false,
 				easing: 'linear'
@@ -129,6 +112,41 @@ var randomPicker = (function(ns) {
 		scrollComplete: function(elements) {
 			console.log('scroll finish');
 		}
+	};
+	
+	var Angel = function(texture, pattern) {
+		this.texture = new PIXI.Sprite(texture);
+		var positions = [
+			{x: 1000, y: 50},
+			{x: 100, y: 400},
+			{x: 1000, y: 600}
+		];
+		var self = this;
+		this.texture.position.x = positions[pattern].x;
+		this.texture.position.y = positions[pattern].y;
+		this.pattern = pattern;
+		stage.addChild(this.texture);
+	};
+	Angel.prototype.move = function(time) {
+		var self = this;
+		if (this.pattern % 3 == 0) {
+			self.texture.position.x += Math.sin(time / 13 * (Math.PI / 180)) * 2;
+			self.texture.position.y += Math.sin(time / 5 * (Math.PI / 180)) * 2;
+		} else if (this.pattern % 3 == 1) {
+			self.texture.position.x += Math.cos(time / 13 * (Math.PI / 180)) * 2;
+			self.texture.position.y += Math.cos(time / 7 * (Math.PI / 180)) * 2;
+		} else if (this.pattern % 3 == 2) {
+			self.texture.position.x += Math.sin(time / 18 * (Math.PI / 180)) * 3;
+			self.texture.position.y += Math.sin(time / 6 * (Math.PI / 180)) * 2;
+		}
+	};
+	
+	var detectAnimate = function($e) {
+		$e.find('span')
+			.toggleClass('animated flash', true)
+			.one('webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend', function() {
+				$e.find('span').toggleClass('animated flash', false);
+			});
 	}
 
 	return ns;

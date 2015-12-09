@@ -87,11 +87,5 @@ var randomPicker = (function(ns) {
 		return this.parent.parent.name + ' ' + this.parent.name + ' ' + this.name;
 	};
 
-	ns.model.Winner = function(data) {
-		this.memberName = data.memberName;
-		this.teamName = data.teamName;
-		this.divisionName = data.divisionName;
-	};
-
 	return ns;
 })(randomPicker || {});
