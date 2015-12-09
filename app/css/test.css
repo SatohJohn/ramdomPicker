@@ -33,11 +33,16 @@ div.content {
 	height: calc(700px / 3);
 	border: solid 1px #eeeeee;
 	text-align: center;
-	vertical-align: middle;
-	padding: auto;
+	position: relative;
 }
 div.content span {
-	margin: auto;
+	width: 80%;
+	left: 50%;
+	position: absolute;
+	top: 50%;
+	-webkit-transform: translate(-50%,-50%);
+	    -ms-transform: translate(-50%,-50%);
+	        transform: translate(-50%,-50%);
 	font-size: 60px;
 }
 

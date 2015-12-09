@@ -1,20 +1,38 @@
 var randomPicker = (function(ns) {
 
 	var stage = null;
+	var width = null;
+	var height = null;
+
+	/**
+	 * Returns a random integer between min (inclusive) and max (inclusive)
+	 * Using Math.round() will give you a non-uniform distribution!
+	 */
+	function getRandomInt(min, max) {
+		return Math.floor(Math.random() * (max - min + 1)) + min;
+	}
 
 	ns.effect = {
 		detect: function(element, isInitialized) {
 			if (isInitialized) {
 				return ;
 			}
-			var width = $(document).width() -10;
-			var height = $(document).height() -10;
+			width = $(document).width() -10;
+			height = $(document).height() -10;
 			var renderer = new PIXI.WebGLRenderer(width, height, {
 				backgroundColor: 0xFFFFFF
 			});
 			$(element).append(renderer.view);
 			stage = new PIXI.Container();
-			PIXI.loader.add('a', '/img/a1.gif').add('b', '/img/b1.gif').add('c', '/img/c1.gif').load(function (loader, resources) {
+			PIXI.loader
+				.add('a', '/img/a1.gif').add('b', '/img/b1.gif').add('c', '/img/c1.gif')
+				.add('p1', '/img/p1.png').add('p2', '/img/p2.png').add('p3', '/img/p3.png').add('p4', '/img/p4.png').add('p5', '/img/p5.png').add('p6', '/img/p6.png').add('p7', '/img/p7.png')
+				.load(function (loader, resources) {
+				var paperNum = 700;
+				var papers = [];
+				for (var i = 0; i < paperNum; i++) {
+					papers.push(new Paper(resources['p' + (i % 7 + 1)].texture.clone()));
+				}
 				var angels = [
 					new Angel(resources.a.texture, 0),
 					new Angel(resources.b.texture, 1),
@@ -43,6 +61,9 @@ var randomPicker = (function(ns) {
 					requestAnimationFrame(animate);
 					var time = new Date().getTime();
 					_.each(angels, function (v) {
+						v.move(time);
+					});
+					_.each(papers, function(v) {
 						v.move(time);
 					});
 
@@ -77,7 +98,7 @@ var randomPicker = (function(ns) {
 						if (isLast) {
 							var $div = $e.find('.scroll-end + div');
 							$div.toggleClass('detected', true);
-							detectAnimate($div.find('span'));
+							detectAnimate($div);
 							ns.effect.scrollComplete($div, false);
 							return ;
 						}
@@ -102,7 +123,7 @@ var randomPicker = (function(ns) {
 				complete: function(elements) {
 					var $div = $e.find(selector + ' + div');
 					$div.toggleClass('detected', true);
-					detectAnimate($div.find('span'));
+					detectAnimate($div);
 					ns.effect.scrollComplete($div, true);
 				},
 				loop: false,
@@ -140,7 +161,34 @@ var randomPicker = (function(ns) {
 			self.texture.position.y += Math.sin(time / 6 * (Math.PI / 180)) * 2;
 		}
 	};
-	
+
+	var Paper = function(texture, options) {
+		this.texture = new PIXI.Sprite(texture);
+		this.texture.position.x = getRandomInt(0, width);
+		this.texture.position.y = getRandomInt(0, height);
+		this.texture.scale.x = this.texture.scale.y = Math.random() / 4.0;
+		this.texture.rotation = Math.sin(Math.random() * (Math.PI / 180)) / 10.0;
+		this.velocity = this.createVelocity();
+		stage.addChild(this.texture);
+	};
+	Paper.prototype.createVelocity = function() {
+		return {
+			x: (Math.random() - 0.5) * 0.5,
+			y: (Math.random() + 1.0) * 2.0,
+			rot: Math.sin((Math.PI / 180)) / (Math.random() * 10.0)
+		}
+	};
+	Paper.prototype.move = function(time) {
+		this.texture.position.x += Math.sin(time * (Math.PI / 30))/ 2.0 + this.velocity.x;
+		this.texture.position.y += Math.sin(time * (Math.PI / 30))/ 2.0 + this.velocity.y;
+		this.texture.rotation += this.velocity.rot;
+		if (this.texture.position.y > height) {
+			this.texture.position.x = getRandomInt(0, width);
+			this.texture.position.y = -10;
+			this.velocity = this.createVelocity();
+		}
+	}
+
 	var detectAnimate = function($e) {
 		$e.find('span')
 			.toggleClass('animated flash', true)

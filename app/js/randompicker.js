@@ -1,13 +1,5 @@
 var randomPicker = (function(ns) {
 
-	/**
-	 * Returns a random integer between min (inclusive) and max (inclusive)
-	 * Using Math.round() will give you a non-uniform distribution!
-	 */
-	function getRandomInt(min, max) {
-		return Math.floor(Math.random() * (max - min + 1)) + min;
-	}
-
 	var format = function(json) {
 		var result = [];
 		_.map(json, function(v) {
@@ -190,6 +182,12 @@ var randomPicker = (function(ns) {
 			var constructDetectClass = function(i) {
 				return (ctrl.isDetectedNumber(i) ? ' scroll-end' : '') + (ctrl.isDetectedNumberToFake(i) ? ' pre-scroll-end' : '');
 			};
+			var createContent = function(v, name, i) {
+				return m('div', {
+					className: 'content' + constructDetectClass(i) + (' ' + name + '_' + i),
+					key: i
+				}, m('span', v.name));
+			};
 			return [m('div', {
 					style: ctrl.isFinished() ? 'display: none;' : '',
 					onclick: ctrl.isScrolling() ? ctrl.stopRoulette : ctrl.startRoulette
@@ -203,10 +201,7 @@ var randomPicker = (function(ns) {
 							m('div', {
 								className: 'wrap' + (ctrl.shiftStopMotionForDivision() ? '' : ' loop')
 							}, ctrl.getDivisions().map(function(v, i) {
-									return m('div', {
-										className: 'content' + (' division_' + i) + constructDetectClass(i),
-										key: i
-									}, m('span', v.name));
+									return createContent(v, 'division', i);
 								})),
 						]),
 						m('div', {
@@ -215,10 +210,7 @@ var randomPicker = (function(ns) {
 							m('div', {
 								className: 'wrap' + (ctrl.shiftStopMotionForTeam() ? '' : ' loop')
 							}, ctrl.getTeams().map(function(v, i) {
-									return m('div', {
-										className: 'content' + constructDetectClass(i) + (' team_' + i),
-										key: i
-									}, m('span', v.name));
+									return createContent(v, 'team', i);
 								})),
 						]),
 						m('div', {
@@ -227,10 +219,7 @@ var randomPicker = (function(ns) {
 							m('div', {
 								className: 'wrap' + (ctrl.shiftStopMotionForMember() ? '' : ' loop')
 							}, ctrl.getMembers().map(function(v, i) {
-									return m('div', {
-										className: 'content' + constructDetectClass(i) + (' member_' + i),
-										key: i
-									}, m('span', v.name));
+									return createContent(v, 'member', i);
 								}))
 						])
 					])
@@ -359,7 +348,7 @@ var randomPicker = (function(ns) {
 		});
 
 		var createDisplayedList = function(l) {
-			return _.flatten([l, l, l, l]);
+			return _.flatten([l, l, l, l, l, l]);
 		};
 		ns.random.vm._divisions = createDisplayedList(ns.random.vm.divisions);
 		ns.random.vm._teams = createDisplayedList(ns.random.vm.teams);
